@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "scm-staging"
+version = "0.0.1"
+description = "Library & tools for staging pull requests from gitea in the Open Build Service"
+authors = ["Dan Čermák <dcermak@suse.com>"]
+license = "GPLv2.0-or-later"
+readme = "README.rst"
+packages = [{include = "scm_staging"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.87.0"
+uvicorn = {extras = ["standard"], version = "^0.20"}
+aiohttp = "^3.8"
+
+[tool.poetry.group.dev.dependencies]
+black = ">=22.10"
+mypy = ">=0.991"
+pytest = ">=7.2"
+httpx = ">=0.23"
+pytest-asyncio = ">=0.20"
+pytest-mock = ">=3.10"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+exclude = ["open-build-service"]
