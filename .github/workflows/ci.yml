@@ -1,0 +1,61 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+
+jobs:
+  format:
+    name: Ensure code is properly formatted
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: poetry-${{ hashFiles('poetry.lock') }}
+
+      - run: |
+          pip install --upgrade poetry
+          poetry install
+          poetry run black --check --diff .
+
+  ci:
+    name: Run the integration tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: poetry-${{ hashFiles('poetry.lock') }}
+
+      - run: pip install --upgrade poetry
+      - run: poetry install
+
+      - name: Start OBS in a container
+        run: |
+          ./start-mini-obs.sh
+          ./configure-mini-obs.sh
+
+      - name: Run the actual tests
+        run: poetry run pytest -vv
+
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     fail_ci_if_error: true
