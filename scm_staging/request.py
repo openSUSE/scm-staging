@@ -79,7 +79,6 @@ class SourceUpdate(enum.StrEnum):
 
 @dataclass(frozen=True)
 class Options(MetaMixin):
-
     sourceupdate: SourceUpdate | None = None
     updatelink: bool | None = None
     makeoriginolder: bool | None = None

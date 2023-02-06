@@ -37,7 +37,6 @@ class WithFieldsAsSubelements(MetaMixin):
 
 @dataclass(frozen=True)
 class WithTransformer(MetaMixin):
-
     test_element: XmlTestElement
 
     def field_transformer(self, field: Field[Any]) -> tuple[Any, str, Any]:

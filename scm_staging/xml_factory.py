@@ -110,7 +110,6 @@ class MetaMixin(ABC):
     def _get_value_from_xml(
         name: str, xml_element: ET.Element, type: typing.Any
     ) -> typing.Any:
-
         if hasattr(type, "from_xml"):
             matching_children = xml_element.findall(type._element_name)
             if len(matching_children) != 1:
