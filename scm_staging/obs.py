@@ -46,6 +46,8 @@ class Osc:
             auth=aiohttp.BasicAuth(login=self.username, password=self.password),
             raise_for_status=True,
             base_url=self.api_url,
+            # https://github.com/openSUSE/open-build-service/issues/13737
+            headers={"Accept": "application/xml; charset=utf-8"},
         )
 
     async def teardown(self) -> None:
