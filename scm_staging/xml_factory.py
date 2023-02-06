@@ -93,6 +93,8 @@ class MetaMixin(ABC):
                 elem.append(field_as_subelement)
             elif hasattr(val, "meta"):
                 elem.append(val.meta)
+            elif isinstance(val, bool):
+                elem.attrib[name] = str(val).lower()
             else:
                 if val:
                     elem.attrib[name] = str(val)
@@ -138,6 +140,10 @@ class MetaMixin(ABC):
 
         if type is int:
             return int(xml_element.attrib[name])
+        if type is bool:
+            if (val := xml_element.attrib[name]) not in ("true", "false"):
+                raise ValueError(f"Invalid boolean value '{val}'")
+            return val == "true"
         if typing.get_origin(type) is list:
             assert len(list_types := typing.get_args(type)) == 1
             if hasattr(list_types[0], "from_xml"):

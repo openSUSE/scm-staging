@@ -6,6 +6,13 @@ from scm_staging.xml_factory import MetaMixin, StrElementField
 
 
 @dataclass(frozen=True)
+class XmlWithBoolean(MetaMixin):
+    _element_name: ClassVar[str] = "with_bool"
+
+    a_bool: bool
+
+
+@dataclass(frozen=True)
 class XmlTestElement(MetaMixin):
     string: str
     number: int
@@ -112,6 +119,7 @@ class Nested(MetaMixin):
             ),
             """<nested val="str"><nested_child number="4"><with_optionals/></nested_child></nested>""",
         ),
+        (XmlWithBoolean(True), """<with_bool a_bool="true"/>"""),
     ],
 )
 def test_xml_generation(element: MetaMixin, expected_xml: str):
