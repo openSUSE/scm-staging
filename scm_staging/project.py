@@ -1,6 +1,5 @@
-from dataclasses import dataclass
-import enum
-from typing import ClassVar, Literal, overload
+from dataclasses import dataclass, field
+from typing import ClassVar, overload
 import xml.etree.ElementTree as ET
 
 from scm_staging.obs import Osc
@@ -59,6 +58,57 @@ class Package:
             pkg_conf.append(scmsync)
 
         return pkg_conf
+
+
+@dataclass(frozen=True)
+class PackageMaintainers:
+    package: list[Person2] = field(default_factory=list)
+    project: list[Person2] = field(default_factory=list)
+
+
+@overload
+async def search_for_maintainers(
+    osc: Osc, *, pkg: Package, roles: list[PersonRole] | None = None
+) -> PackageMaintainers:
+    ...
+
+
+@overload
+async def search_for_maintainers(
+    osc: Osc, *, pkg_name: str, roles: list[PersonRole] | None = None
+) -> PackageMaintainers:
+    ...
+
+
+async def search_for_maintainers(
+    osc: Osc,
+    *,
+    pkg: Package | None = None,
+    pkg_name: str | None = None,
+    roles: list[PersonRole] | None = None,
+) -> PackageMaintainers:
+    if not pkg_name:
+        assert pkg
+        pkg_name = pkg.name
+
+    params = {"package": pkg_name}
+    if roles:
+        params["filter"] = ",".join(roles)
+
+    owners = await OwnerCollection.from_response(
+        await osc.api_request("/search/owner", method="GET", params=params)
+    )
+
+    pkg_maintainers = []
+    prj_maintainers = []
+    for owner in owners.owner:
+        if owner.project and owner.package == pkg_name:
+            pkg_maintainers.extend(owner.person)
+
+        if owner.project and not owner.package:
+            prj_maintainers.extend(owner.person)
+
+    return PackageMaintainers(package=pkg_maintainers, project=prj_maintainers)
 
 
 @overload
