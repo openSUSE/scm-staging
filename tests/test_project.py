@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 import pytest
+from scm_staging.person import PersonRole
 from scm_staging.project import PathEntry, Person, Project, Repository
+from scm_staging.xml_factory import StrElementField
 
 
 @pytest.mark.parametrize(
@@ -9,10 +11,10 @@ from scm_staging.project import PathEntry, Person, Project, Repository
         (
             Project(
                 name="home:defolos:BCI:CR:SLE-15-SP4",
-                title="BCI Development project for SLE 15 SP4",
+                title=StrElementField("BCI Development project for SLE 15 SP4"),
                 person=[
-                    Person(userid="fcrozat", role="bugowner"),
-                    Person(userid="aherzig", role="maintainer"),
+                    Person(userid="fcrozat", role=PersonRole.BUGOWNER),
+                    Person(userid="aherzig", role=PersonRole.MAINTAINER),
                 ],
                 repository=[
                     Repository(
