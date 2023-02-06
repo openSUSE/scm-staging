@@ -4,25 +4,8 @@ from typing import ClassVar, Literal, overload
 import xml.etree.ElementTree as ET
 
 from scm_staging.obs import Osc
+from scm_staging.person import OwnerCollection, Person, Person2, PersonRole
 from .xml_factory import MetaMixin, StrElementField
-
-
-ROLE_T = Literal["bugowner", "maintainer"]
-
-
-@enum.unique
-class PersonRole(enum.StrEnum):
-    BUGOWNER = enum.auto()
-    MAINTAINER = enum.auto()
-    READER = enum.auto()
-
-
-@dataclass(frozen=True)
-class Person(MetaMixin):
-    userid: str
-    role: PersonRole = PersonRole.MAINTAINER
-
-    _element_name: ClassVar[str] = "person"
 
 
 @dataclass(frozen=True)

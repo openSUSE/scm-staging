@@ -6,6 +6,7 @@ from dataclasses import Field, dataclass, field
 from typing import ClassVar, NoReturn, TypeVar, overload
 import typing
 from scm_staging.obs import Osc
+from scm_staging.person import Person2
 
 from scm_staging.project import Package, Person, PersonRole, Project
 from .xml_factory import MetaMixin, StrElementField
@@ -90,12 +91,6 @@ T = TypeVar("T")
 
 
 @dataclass(frozen=True)
-class _RequestActionPerson(MetaMixin):
-    name: str
-    role: PersonRole
-
-
-@dataclass(frozen=True)
 class RequestAction(MetaMixin):
     type: RequestActionType
 
@@ -121,11 +116,11 @@ class RequestAction(MetaMixin):
     ) -> tuple[T, str, typing.Type[T]]:
         if field.name == "person":
             pers = (
-                _RequestActionPerson(name=self.person.userid, role=self.person.role)
+                Person2(name=self.person.userid, role=self.person.role)
                 if self.person
                 else None
             )
-            return pers, "person", _RequestActionPerson | None
+            return pers, "person", Person2 | None
         return super().field_transformer(field)
 
     @staticmethod
