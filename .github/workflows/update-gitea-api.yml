@@ -1,0 +1,43 @@
+---
+name: update gitea API wrapper
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  update-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: poetry-${{ hashFiles('poetry.lock') }}
+
+      - name: generate a python api wrapper using swagger-codegen
+        run: |
+          podman run --pull=always --rm -v $(pwd):/local:Z \
+            docker.io/swaggerapi/swagger-codegen-cli \
+              generate -i https://gitea.opensuse.org/swagger.v1.json \
+              -l python --library asyncio -o /local/gitea
+
+      - name: Run black
+        run: |
+          poetry install
+          poetry run black .
+
+      - name: create a pull request with the updated files
+        uses: peter-evans/create-pull-request@v4
+        with:
+          delete-branch: true
+          commit-message: "🤖: Update gitea API via swagger-codegen-cli"
+          reviewers: dcermak
+          assignees: dcermak
+          title: "🤖: Update gitea API"
+          body: |
+            This is an automated update regenerating the gitea API via swagger-codegen-cli
+          base: main
+          add-paths: |
+            gitea/*
