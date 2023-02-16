@@ -11,7 +11,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 fastapi = "^0.87.0"
 uvicorn = {extras = ["standard"], version = "^0.20"}
 aiohttp = "^3.8"

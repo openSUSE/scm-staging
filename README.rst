@@ -8,7 +8,7 @@ requests and eventually a full staging workflow from pull requests in gitea.
 Requirements
 ------------
 
-- Python 3.10 or later
+- Python 3.11 or later
 - `poetry <https://python-poetry.org/>`_
 
 - A machine with a public IP
@@ -18,7 +18,15 @@ Setup
 -----
 
 1. Clone this repository
-2. Export the environment variables ``OSC_USER`` and ``OSC_PASSWORD`` containing
+   git clone https://github.com/dcermak/scm-staging
+
+2. Install required library
+   cd scm-staging
+   # skip this step if you have already installed poetry
+   pipx install poetry
+   poetry install 
+
+3. Export the environment variables ``OSC_USER`` and ``OSC_PASSWORD`` containing
    your OBS credentials.
 3. Launch the application via :command:`poetry run uvicorn scm_staging:app --reload --host 0.0.0.0`
 4. Go to your dist-git repository on https://gitea.opensuse.org and add a
