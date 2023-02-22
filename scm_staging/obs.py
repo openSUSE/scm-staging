@@ -3,7 +3,7 @@ import dataclasses
 import os
 import typing
 
-from scm_staging.logging import LOGGER
+from scm_staging.logger import LOGGER
 
 
 @dataclasses.dataclass
