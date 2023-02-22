@@ -10,7 +10,7 @@ from .request import RequestActionType
 from .request import RequestStatus
 from scm_staging.xml_factory import StrElementField
 from . import project
-from .logging import LOGGER
+from scm_staging.logger import LOGGER
 
 app = FastAPI()
 
