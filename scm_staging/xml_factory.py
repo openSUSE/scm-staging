@@ -188,7 +188,7 @@ class MetaMixin(ABC):
 
         if xml_element.tag != cls._element_name:
             raise ValueError(
-                f"Invalid XML tag '{xml_element.tag}', expected {cls._element_name}"
+                f"Invalid XML tag '{xml_element.tag}', expected '{cls._element_name}'"
             )
 
         kwargs: dict[str, typing.Any] = {}
