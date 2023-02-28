@@ -1,9 +1,17 @@
+import asyncio
 from dataclasses import dataclass, field
 from typing import ClassVar, overload
 import xml.etree.ElementTree as ET
 
 from scm_staging.obs import Osc
-from scm_staging.person import OwnerCollection, Person, Person2, PersonRole
+from scm_staging.person import (
+    OwnerCollection,
+    Person,
+    Person2,
+    PersonRole,
+    UserGroup,
+    fetch_group,
+)
 from .xml_factory import MetaMixin, StrElementField
 
 
@@ -68,14 +76,22 @@ class PackageMaintainers:
 
 @overload
 async def search_for_maintainers(
-    osc: Osc, *, pkg: Package, roles: list[PersonRole] | None = None
+    osc: Osc,
+    *,
+    pkg: Package,
+    roles: list[PersonRole] | None = None,
+    groups_to_ignore: list[str] | None = None,
 ) -> PackageMaintainers:
     ...
 
 
 @overload
 async def search_for_maintainers(
-    osc: Osc, *, pkg_name: str, roles: list[PersonRole] | None = None
+    osc: Osc,
+    *,
+    pkg_name: str,
+    roles: list[PersonRole] | None = None,
+    groups_to_ignore: list[str] | None = None,
 ) -> PackageMaintainers:
     ...
 
@@ -86,10 +102,24 @@ async def search_for_maintainers(
     pkg: Package | None = None,
     pkg_name: str | None = None,
     roles: list[PersonRole] | None = None,
+    groups_to_ignore: list[str] | None = None,
 ) -> PackageMaintainers:
+    """Query the build service to find the maintainers of the package provided
+    either by name or via a :py:class:`Package` instance.
+
+    This function includes the maintainers from groups in the result.
+    You can exclude the members from specific groups to be added to the results
+    by adding the groupname to the ``groups_to_ignore`` parameter. This can be
+    used to exclude e.g. ``factory-maintainers`` who are listed as
+    co-maintainers for every package in ``openSUSE:Factory``.
+    """
+
     if not pkg_name:
         assert pkg
         pkg_name = pkg.name
+
+    if groups_to_ignore is None:
+        groups_to_ignore = []
 
     params = {"package": pkg_name}
     if roles:
@@ -102,13 +132,29 @@ async def search_for_maintainers(
     pkg_maintainers = []
     prj_maintainers = []
     for owner in owners.owner:
+
+        async def fetch_group_members() -> list[Person2]:
+            tasks = []
+            for grp in owner.group:
+                if grp.name not in groups_to_ignore:
+                    tasks.append(fetch_group(osc, grp.name))
+
+            res: tuple[UserGroup] = await asyncio.gather(*tasks)
+            return [
+                Person2(maint.userid) for grp in res for maint in grp.maintainer
+            ] + [Person2(pers.userid) for grp in res for pers in grp.person.person]
+
         if owner.project and owner.package == pkg_name:
             pkg_maintainers.extend(owner.person)
+            pkg_maintainers.extend(await fetch_group_members())
 
         if owner.project and not owner.package:
             prj_maintainers.extend(owner.person)
+            prj_maintainers.extend(await fetch_group_members())
 
-    return PackageMaintainers(package=pkg_maintainers, project=prj_maintainers)
+    return PackageMaintainers(
+        package=list(set(pkg_maintainers)), project=list(set(prj_maintainers))
+    )
 
 
 @overload

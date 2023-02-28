@@ -42,9 +42,49 @@ class User(MetaMixin):
     _element_name: ClassVar[str] = "person"
 
 
+@dataclass(frozen=True)
+class UserGroup(MetaMixin):
+    @dataclass(frozen=True)
+    class GroupMaintainer(MetaMixin):
+        _element_name: ClassVar[str] = "maintainer"
+        userid: str
+
+    @dataclass(frozen=True)
+    class GroupPerson(MetaMixin):
+        @dataclass(frozen=True)
+        class GroupPersonEntry(MetaMixin):
+            _element_name: ClassVar[str] = "person"
+            userid: str
+
+        _element_name: ClassVar[str] = "person"
+        person: list[GroupPersonEntry]
+
+    title: StrElementField
+    email: StrElementField | None
+
+    person: GroupPerson
+    maintainer: list[GroupMaintainer] = field(default_factory=list)
+
+    _element_name: ClassVar[str] = "group"
+
+
+@dataclass(frozen=True)
+class Group(MetaMixin):
+    _element_name: ClassVar[str] = "group"
+
+    name: str
+    role: PersonRole = PersonRole.MAINTAINER
+
+
 async def fetch_user(osc: Osc, username: str) -> User:
     return await User.from_response(
         await osc.api_request(f"/person/{username}", method="GET")
+    )
+
+
+async def fetch_group(osc: Osc, groupname: str) -> UserGroup:
+    return await UserGroup.from_response(
+        await osc.api_request(f"/group/{groupname}", method="GET")
     )
 
 
@@ -54,6 +94,8 @@ class Owner(MetaMixin):
     package: str | None = None
 
     person: list[Person2] = field(default_factory=list)
+
+    group: list[Group] = field(default_factory=list)
 
     _element_name: ClassVar[str] = "owner"
 
