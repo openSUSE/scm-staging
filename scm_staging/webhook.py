@@ -1,8 +1,20 @@
 import asyncio
-from typing import Literal
+from dataclasses import dataclass
+from enum import StrEnum, unique
+import os
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+
+from swagger_client import (
+    Configuration,
+    ApiClient,
+    IssueApi,
+    CreateIssueCommentOption,
+    RepositoryApi,
+    PullReview,
+)
+from scm_staging.ci_status import set_commit_status_from_obs
 
 from scm_staging.obs import Osc
 from . import request
@@ -58,13 +70,15 @@ class Ref(BaseModel):
     repo: Repository
 
 
-PR_APPROVED = "pull_request_review_approved"
-PR_REJECTED = "pull_request_review_rejected"
-_PR_TYPE = Literal["pull_request_review_approved", "pull_request_review_rejected"]
+@unique
+class PullRequestReviewType(StrEnum):
+    APPROVED = "pull_request_review_approved"
+    REJECTED = "pull_request_review_rejected"
+    COMMENT = "pull_request_comment"
 
 
 class Review(BaseModel):
-    type: _PR_TYPE | str
+    type: PullRequestReviewType | str
     content: str
 
 
@@ -99,25 +113,78 @@ class PullRequestPayload(BaseModel):
     review: Review | None
 
 
-_TARGET_BRANCH_NAME = "factory"
-_BOT_USER = "defolos"
+@dataclass(frozen=True)
+class AppConfig:
+    bot_user: str
+    branch_name: str
+    osc: Osc
+    destination_project: str
+
+    _conf: Configuration
+    _api_client: ApiClient
+
+    @staticmethod
+    def from_env() -> "AppConfig":
+        api_key = os.getenv("GITEA_API_KEY")
+        if not api_key:
+            raise ValueError("GITEA_API_KEY environment variable must be set")
+
+        conf = Configuration()
+        conf.api_key["token"] = api_key
+        conf.host = "https://gitea.opensuse.org/api/v1"
+
+        return AppConfig(
+            osc=(osc := Osc.from_env()),
+            bot_user=os.getenv("BOT_USER", osc.username),
+            branch_name=os.getenv("BRANCH_NAME", "factory"),
+            destination_project=os.getenv(
+                "DESTINATION_PROJECT", "devel:Factory:git-workflow:mold:core"
+            ),
+            _conf=conf,
+            _api_client=ApiClient(conf),
+        )
+
+
+_app_config: AppConfig | None = None
+
+
+@app.on_event("startup")
+def load_app_config():
+    global _app_config
+    _app_config = AppConfig.from_env()
+
+
+@app.on_event("shutdown")
+async def teardown_osc():
+    global _app_config
+    if _app_config is not None:
+        await _app_config.osc.teardown()
+        _app_config = None
 
 
 def package_from_pull_request(payload: PullRequestPayload) -> project.Package:
     return project.Package(
         name=payload.repository.name,
         title=f"The {payload.repository.name} package",
-        scmsync=f"{payload.pull_request.head.repo.clone_url}#{payload.pull_request.head.ref}",
+        scmsync=f"{payload.pull_request.head.repo.clone_url}#{payload.pull_request.head.sha}",
     )
 
 
 def project_from_pull_request(payload: PullRequestPayload) -> project.Project:
+    assert _app_config
     return project.Project(
-        name=f"home:{_BOT_USER}:SCM_STAGING:Factory:{payload.repository.name}:{payload.pull_request.number}",
+        name=f"home:{_app_config.bot_user}:SCM_STAGING:Factory:{payload.repository.name}:{payload.pull_request.number}",
         title=StrElementField(
             f"Project for Pull Request {payload.pull_request.number}"
         ),
-        person=[project.Person(userid=_BOT_USER, role=project.PersonRole.MAINTAINER)],
+        description=StrElementField(
+            f"Project for Pull Request {payload.pull_request.url}"
+        ),
+        person=[
+            project.Person(
+                userid=_app_config.bot_user, role=project.PersonRole.MAINTAINER
+            )
+        ],
         repository=[
             project.Repository(
                 name="openSUSE_Factory",
@@ -130,25 +197,70 @@ def project_from_pull_request(payload: PullRequestPayload) -> project.Project:
     )
 
 
-osc: Osc | None = None
+@app.get("/alive")
+async def am_i_alive():
+    return {}
+
+
+async def check_if_pr_approved(
+    osc: Osc,
+    api_client: ApiClient,
+    owner: str,
+    repo_name: str,
+    pr_number: int,
+    pkg_name: str,
+) -> bool:
+    """Checks if the pull request $owner/$repo_name/$pr_number has been approved
+    by at least one maintainer of the package `pkg_name` and no changes have
+    been requested.
+
+    """
+    repo_api = RepositoryApi(api_client)
+    reviews: list[PullReview] = await repo_api.repo_list_pull_reviews(
+        owner, repo_name, pr_number
+    )
+
+    maintainers = await project.search_for_maintainers(
+        osc, pkg_name=pkg_name, groups_to_ignore=["factory-maintainers"]
+    )
+    usernames: list[str] = []
+    if maintainers.package:
+        usernames.extend(pers.name for pers in maintainers.package)
+    if maintainers.project:
+        usernames.extend(pers.name for pers in maintainers.project)
+
+    usernames = list(set(usernames))
+
+    valid_reviews = []
+    for review in reviews:
+        if not review.stale and review.user.login in usernames:
+            valid_reviews.append(review)
+
+    if any(review.state == "REQUEST_CHANGES" for review in valid_reviews):
+        return False
+
+    if any(review.state == "APPROVED" for review in valid_reviews):
+        return True
+
+    return False
 
 
 @app.post("/hook")
 async def webhook(payload: PullRequestPayload):
-    global osc
-    if not osc:
-        osc = Osc.from_env()
+    assert _app_config
 
     LOGGER.debug(payload)
 
     if (
         base := payload.pull_request.base
-    ).ref != _TARGET_BRANCH_NAME and base.label != _TARGET_BRANCH_NAME:
+    ).ref != _app_config.branch_name and base.label != _app_config.branch_name:
         LOGGER.debug("wrong branch name %s", base.ref)
         return {}
 
     pkg = package_from_pull_request(payload)
     prj = project_from_pull_request(payload)
+
+    osc = _app_config.osc
 
     if payload.action in ("closed", "merged"):
         tasks = []
@@ -177,16 +289,54 @@ async def webhook(payload: PullRequestPayload):
         await project.delete(osc, prj=prj, force=True)
         return {}
 
-    if (review := payload.review) and review.type == PR_APPROVED:
-        LOGGER.debug("PR has been approved, creating package")
-        await project.send_meta(osc, prj=prj)
-        await project.send_meta(osc, prj=prj, pkg=pkg)
-        await request.submit_package(
-            osc=osc,
-            source_prj=prj.name,
-            pkg_name=pkg.name,
-            dest_prj="devel:Factory:git-workflow:mold:core",
-        )
+    owner = payload.repository.owner.login
+    repo_name = payload.repository.name
+    pr_num = payload.pull_request.number
 
-    # raise ValueError("pr was not approved")
+    await set_commit_status_from_obs(
+        _app_config.osc,
+        _app_config._api_client,
+        # use "upstream" here, otherwise the commit status will not show up in
+        # the PR and will not gate it
+        repo_owner=base.repo.owner.login,
+        repo_name=base.repo.name,
+        commit_sha=payload.pull_request.head.sha,
+        pkg_name=pkg.name,
+        project_name=prj.name,
+    )
+
+    # don't create SRs for not approved PRs
+    if not await check_if_pr_approved(
+        _app_config.osc,
+        _app_config._api_client,
+        owner=owner,
+        repo_name=repo_name,
+        pr_number=pr_num,
+        pkg_name=pkg.name,
+    ):
+        return {}
+
+    LOGGER.debug("PR has been approved, creating package")
+    await project.send_meta(osc, prj=prj)
+    await project.send_meta(osc, prj=prj, pkg=pkg)
+
+    new_req = await request.submit_package(
+        osc=osc,
+        source_prj=prj.name,
+        pkg_name=pkg.name,
+        dest_prj=_app_config.destination_project,
+        supersede_old_request=True,
+    )
+
+    # comment on the PR with a link to the SR
+    issue_api = IssueApi(_app_config._api_client)
+    await issue_api.issue_create_comment(
+        payload.repository.owner.login,
+        payload.repository.name,
+        payload.pull_request.number,
+        body=CreateIssueCommentOption(
+            f"Created submit request [sr#{new_req.id}](https://build.opensuse.org/request/show/{new_req.id})"
+        ),
+    )
+
     return {}
