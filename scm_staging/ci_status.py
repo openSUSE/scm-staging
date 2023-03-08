@@ -7,7 +7,6 @@ from swagger_client.api_client import ApiClient
 
 from swagger_client.models.create_status_option import CreateStatusOption
 from swagger_client.models.branch import Branch
-from swagger_client.models.payload_commit import PayloadCommit
 from scm_staging.build_result import PackageCode, fetch_build_result
 from scm_staging.obs import Osc
 
@@ -84,7 +83,7 @@ async def set_commit_status_from_obs(
         body=CreateStatusOption(
             context=OBS_CI_CTX,
             target_url=f"https://build.opensuse.org/package/show/{project_name}/{pkg_name}",
-            state=ci_state,
+            state=str(ci_state),
         ),
     )
 
@@ -96,8 +95,7 @@ async def fetch_hash_of_head_of_branch(
     branch: Branch = await repo_api.repo_get_branch(
         owner=repo_owner, repo=repo_name, branch=branch_name
     )
-    commit: PayloadCommit = branch.commit
-    return commit.id
+    return branch.commit.id
 
 
 if __name__ == "__main__":

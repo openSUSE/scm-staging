@@ -7,9 +7,6 @@ from typing import TypedDict
 import aio_pika
 from swagger_client.api.repository_api import RepositoryApi
 from swagger_client.models.pull_request import PullRequest
-from swagger_client.models.repository import Repository
-from swagger_client.models.pr_branch_info import PRBranchInfo
-from swagger_client.models.user import User
 
 from scm_staging.ci_status import set_commit_status_from_obs
 from scm_staging.webhook import AppConfig
@@ -48,16 +45,12 @@ class PackageBuildUnchangedPayload(PackageBuildSuccessPayload):
 
 
 async def update_commit_status(pr: PullRequest, pkg_name: str, prj_name: str) -> None:
-    head: PRBranchInfo = pr.head
-    repo: Repository = head.repo
-    owner: User = repo.owner
-
     await set_commit_status_from_obs(
         _app_config.osc,
         _app_config._api_client,
-        repo_owner=owner.login,
-        repo_name=repo.name,
-        commit_sha=head.sha,
+        commit_sha=(head := pr.head).sha,
+        repo_name=(repo := head.repo).name,
+        repo_owner=repo.owner.login,
         pkg_name=pkg_name,
         project_name=prj_name,
     )

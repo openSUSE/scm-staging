@@ -6,6 +6,11 @@ import typing
 from scm_staging.logger import LOGGER
 
 
+class ObsException(aiohttp.ClientResponseError):
+    def __str__(self) -> str:
+        return f"Error talking to OBS: {self.status=}, {self.message=}, {self.request_info=}"
+
+
 @dataclasses.dataclass
 class Osc:
     username: str
@@ -37,9 +42,12 @@ class Osc:
             params,
             payload,
         )
-        return await self._session.request(
-            method=method, params=params, url=route, data=payload
-        )
+        try:
+            return await self._session.request(
+                method=method, params=params, url=route, data=payload
+            )
+        except aiohttp.ClientResponseError as cre_exc:
+            raise ObsException(**cre_exc.__dict__) from cre_exc
 
     def __post_init__(self) -> None:
         self._session = aiohttp.ClientSession(

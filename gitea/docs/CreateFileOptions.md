@@ -1,5 +1,7 @@
 # CreateFileOptions
 
+CreateFileOptions options for creating files Note: `author` and `committer` are optional (if only one is given, it will be used for the other, otherwise the authenticated user will be used)
+
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
@@ -12,6 +14,23 @@ Name | Type | Description | Notes
 **new_branch** | **str** | new_branch (optional) will make a new branch from &#x60;branch&#x60; before creating the file | [optional] 
 **signoff** | **bool** | Add a Signed-off-by trailer by the committer at the end of the commit log message. | [optional] 
 
+## Example
+
+```python
+from swagger_client.models.create_file_options import CreateFileOptions
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of CreateFileOptions from a JSON string
+create_file_options_instance = CreateFileOptions.from_json(json)
+# print the JSON string representation of the object
+print CreateFileOptions.to_json()
+
+# convert the object into a dict
+create_file_options_dict = create_file_options_instance.to_dict()
+# create an instance of CreateFileOptions from a dict
+create_file_options_form_dict = create_file_options.from_dict(create_file_options_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

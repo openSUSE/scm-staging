@@ -1,5 +1,7 @@
 # Repository
 
+Repository represents a repository
+
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
@@ -12,6 +14,7 @@ Name | Type | Description | Notes
 **avatar_url** | **str** |  | [optional] 
 **clone_url** | **str** |  | [optional] 
 **created_at** | **datetime** |  | [optional] 
+**default_allow_maintainer_edit** | **bool** |  | [optional] 
 **default_branch** | **str** |  | [optional] 
 **default_delete_branch_after_merge** | **bool** |  | [optional] 
 **default_merge_style** | **str** |  | [optional] 
@@ -33,6 +36,7 @@ Name | Type | Description | Notes
 **internal_tracker** | [**InternalTracker**](InternalTracker.md) |  | [optional] 
 **language** | **str** |  | [optional] 
 **languages_url** | **str** |  | [optional] 
+**link** | **str** |  | [optional] 
 **mirror** | **bool** |  | [optional] 
 **mirror_interval** | **str** |  | [optional] 
 **mirror_updated** | **datetime** |  | [optional] 
@@ -54,6 +58,23 @@ Name | Type | Description | Notes
 **watchers_count** | **int** |  | [optional] 
 **website** | **str** |  | [optional] 
 
+## Example
+
+```python
+from swagger_client.models.repository import Repository
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of Repository from a JSON string
+repository_instance = Repository.from_json(json)
+# print the JSON string representation of the object
+print Repository.to_json()
+
+# convert the object into a dict
+repository_dict = repository_instance.to_dict()
+# create an instance of Repository from a dict
+repository_form_dict = repository.from_dict(repository_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

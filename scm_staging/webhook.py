@@ -130,9 +130,11 @@ class AppConfig:
         if not api_key:
             raise ValueError("GITEA_API_KEY environment variable must be set")
 
-        conf = Configuration()
-        conf.api_key["token"] = api_key
-        conf.host = "https://gitea.opensuse.org/api/v1"
+        conf = Configuration(
+            api_key={"AuthorizationHeaderToken": api_key},
+            api_key_prefix={"AuthorizationHeaderToken": "token"},
+            host="https://gitea.opensuse.org/api/v1",
+        )
 
         return AppConfig(
             osc=(osc := Osc.from_env()),
@@ -342,7 +344,7 @@ async def webhook(payload: PullRequestPayload):
         payload.repository.name,
         payload.pull_request.number,
         body=CreateIssueCommentOption(
-            f"Created submit request [sr#{new_req.id}](https://build.opensuse.org/request/show/{new_req.id})"
+            body=f"Created submit request [sr#{new_req.id}](https://build.opensuse.org/request/show/{new_req.id})"
         ),
     )
 

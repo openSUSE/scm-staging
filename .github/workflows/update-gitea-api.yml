@@ -22,9 +22,10 @@ jobs:
       - name: generate a python api wrapper using swagger-codegen
         run: |
           podman run --pull=always --rm -v $(pwd):/local:Z \
-            docker.io/swaggerapi/swagger-codegen-cli \
-              generate -i https://gitea.opensuse.org/swagger.v1.json \
-              -l python --library asyncio -o /local/gitea
+            docker.io/openapitools/openapi-generator-cli generate \
+              -i https://gitea.opensuse.org/swagger.v1.json \
+              -g python-nextgen --library asyncio -o /local/gitea \
+              -p packageName=swagger_client
 
       - name: Run black
         run: |
