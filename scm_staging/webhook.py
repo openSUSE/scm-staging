@@ -2,18 +2,21 @@ import asyncio
 from dataclasses import dataclass
 from enum import StrEnum, unique
 import os
+from gitea.api_config import APIConfig
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+from gitea.services.async_repository_service import repoListPullReviews
 
-from swagger_client import (
-    Configuration,
-    ApiClient,
-    IssueApi,
-    CreateIssueCommentOption,
-    RepositoryApi,
-    PullReview,
-)
+# from swagger_client import (
+#     Configuration,
+#     ApiClient,
+#     IssueApi,
+#     CreateIssueCommentOption,
+#     RepositoryApi,
+#     PullReview,
+# )
+
 from scm_staging.ci_status import set_commit_status_from_obs
 
 from scm_staging.obs import Osc
@@ -120,18 +123,22 @@ class AppConfig:
     osc: Osc
     destination_project: str
 
-    _conf: Configuration
-    _api_client: ApiClient
+    _conf: APIConfig  # Configuration
+    # _api_client: ApiClient
+
+    async def teardown(self) -> None:
+        await self.osc.teardown()
 
     @staticmethod
     def from_env() -> "AppConfig":
-        api_key = os.getenv("GITEA_API_KEY")
-        if not api_key:
-            raise ValueError("GITEA_API_KEY environment variable must be set")
+        # api_key = os.getenv("GITEA_API_KEY")
+        # if not api_key:
+        #     raise ValueError("GITEA_API_KEY environment variable must be set")
 
-        conf = Configuration()
-        conf.api_key["token"] = api_key
-        conf.host = "https://gitea.opensuse.org/api/v1"
+        conf = APIConfig(
+            base_path="https://gitea.opensuse.org/api/v1"
+        )  # Configuration(host="https://gitea.opensuse.org/api/v1", api_key=api_key)
+        # conf.
 
         return AppConfig(
             osc=(osc := Osc.from_env()),
@@ -141,7 +148,7 @@ class AppConfig:
                 "DESTINATION_PROJECT", "devel:Factory:git-workflow:mold:core"
             ),
             _conf=conf,
-            _api_client=ApiClient(conf),
+            # _api_client=ApiClient(conf),
         )
 
 
@@ -158,7 +165,7 @@ def load_app_config():
 async def teardown_osc():
     global _app_config
     if _app_config is not None:
-        await _app_config.osc.teardown()
+        await _app_config.teardown()
         _app_config = None
 
 
@@ -204,7 +211,8 @@ async def am_i_alive():
 
 async def check_if_pr_approved(
     osc: Osc,
-    api_client: ApiClient,
+    # api_client: ApiClient,
+    api_config: APIConfig,
     owner: str,
     repo_name: str,
     pr_number: int,
@@ -215,10 +223,13 @@ async def check_if_pr_approved(
     been requested.
 
     """
-    repo_api = RepositoryApi(api_client)
-    reviews: list[PullReview] = await repo_api.repo_list_pull_reviews(
-        owner, repo_name, pr_number
+    reviews = await repoListPullReviews(
+        owner, repo_name, pr_number, api_config_override=api_config
     )
+    # repo_api = RepositoryApi(api_client)
+    # reviews: list[PullReview] = await repo_api.repo_list_pull_reviews(
+    #     owner, repo_name, pr_number
+    # )
 
     maintainers = await project.search_for_maintainers(
         osc, pkg_name=pkg_name, groups_to_ignore=["factory-maintainers"]
@@ -335,7 +346,7 @@ async def webhook(payload: PullRequestPayload):
         payload.repository.name,
         payload.pull_request.number,
         body=CreateIssueCommentOption(
-            f"Created submit request [sr#{new_req.id}](https://build.opensuse.org/request/show/{new_req.id})"
+            body=f"Created submit request [sr#{new_req.id}](https://build.opensuse.org/request/show/{new_req.id})"
         ),
     )
 

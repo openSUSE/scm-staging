@@ -7,7 +7,7 @@ license = "GPLv2.0-or-later"
 readme = "README.rst"
 packages = [
     { include = "scm_staging" },
-    { include = "swagger_client", from = "gitea" }
+    { include = "gitea" }
 ]
 
 [tool.poetry.dependencies]
@@ -30,6 +30,7 @@ pytest = ">=7.2"
 httpx = ">=0.23"
 pytest-asyncio = ">=0.20"
 pytest-mock = ">=3.10"
+openapi-python-generator = "^0.4"
 
 [build-system]
 requires = ["poetry-core"]

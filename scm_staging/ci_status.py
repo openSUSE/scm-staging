@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
 from enum import StrEnum, auto
-from swagger_client.api.repository_api import RepositoryApi
-from swagger_client.api_client import ApiClient
 
-from swagger_client.models.create_status_option import CreateStatusOption
-from swagger_client.models.branch import Branch
-from swagger_client.models.payload_commit import PayloadCommit
+from gitea.api_config import APIConfig
+from gitea.models import CreateStatusOption
+from gitea.services.async_repository_service import repoCreateStatus, repoGetBranch
+
+# from swagger_client.api.repository_api import RepositoryApi
+# from swagger_client.api_client import ApiClient
+
+# from swagger_client.models.create_status_option import CreateStatusOption
+# from swagger_client.models.branch import Branch
+# from swagger_client.models.payload_commit import PayloadCommit
 from scm_staging.build_result import PackageCode, fetch_build_result
 from scm_staging.obs import Osc
 
@@ -24,7 +29,7 @@ OBS_CI_CTX = "obs/scm/build"
 
 async def set_commit_status_from_obs(
     osc: Osc,
-    api_client: ApiClient,
+    api_config: APIConfig,
     repo_owner: str,
     repo_name: str,
     commit_sha: str,
@@ -67,28 +72,31 @@ async def set_commit_status_from_obs(
     elif pkg_status_codes == set([PackageCode.SUCCEEDED]):
         ci_state = CommitStatusState.SUCCESS
 
-    repo_api = RepositoryApi(api_client)
-    await repo_api.repo_create_status(
+    # repo_api = RepositoryApi(api_client)
+    await repoCreateStatus(
         owner=repo_owner,
         repo=repo_name,
         sha=commit_sha,
-        body=CreateStatusOption(
+        data=CreateStatusOption(
             context=OBS_CI_CTX,
             target_url=f"https://build.opensuse.org/package/show/{project_name}/{pkg_name}",
             state=ci_state,
         ),
+        api_config_override=api_config,
     )
 
 
 async def fetch_hash_of_head_of_branch(
-    api_client: ApiClient, repo_owner: str, repo_name: str, branch_name: str = "main"
+    api_config: APIConfig, repo_owner: str, repo_name: str, branch_name: str = "main"
 ) -> str:
-    repo_api = RepositoryApi(api_client)
-    branch: Branch = await repo_api.repo_get_branch(
-        owner=repo_owner, repo=repo_name, branch=branch_name
+    # repo_api = RepositoryApi(api_client)
+    branch = await repoGetBranch(
+        owner=repo_owner,
+        repo=repo_name,
+        branch=branch_name,
+        api_config_override=api_config,
     )
-    commit: PayloadCommit = branch.commit
-    return commit.id
+    return branch.commit.id
 
 
 if __name__ == "__main__":
@@ -142,7 +150,7 @@ if __name__ == "__main__":
     if not (commit := args.commit_sha[0]):
         commit = loop.run_until_complete(
             fetch_hash_of_head_of_branch(
-                conf._api_client,
+                conf._conf,
                 repo_owner=repo_owner,
                 repo_name=repo_name,
                 branch_name=args.branch[0],
@@ -153,7 +161,7 @@ if __name__ == "__main__":
         loop.run_until_complete(
             set_commit_status_from_obs(
                 conf.osc,
-                conf._api_client,
+                conf._conf,
                 repo_owner=repo_owner,
                 repo_name=repo_name,
                 commit_sha=commit,
