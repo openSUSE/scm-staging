@@ -1,5 +1,7 @@
 # Repository
 
+Repository represents a repository
+
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
@@ -54,6 +56,23 @@ Name | Type | Description | Notes
 **watchers_count** | **int** |  | [optional] 
 **website** | **str** |  | [optional] 
 
+## Example
+
+```python
+from swagger_client.models.repository import Repository
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of Repository from a JSON string
+repository_instance = Repository.from_json(json)
+# print the JSON string representation of the object
+print Repository.to_json()
+
+# convert the object into a dict
+repository_dict = repository_instance.to_dict()
+# create an instance of Repository from a dict
+repository_form_dict = repository.from_dict(repository_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

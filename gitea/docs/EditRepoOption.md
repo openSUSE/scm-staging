@@ -1,5 +1,7 @@
 # EditRepoOption
 
+EditRepoOption options when editing a repository's properties
+
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
@@ -30,6 +32,23 @@ Name | Type | Description | Notes
 **template** | **bool** | either &#x60;true&#x60; to make this repository a template or &#x60;false&#x60; to make it a normal repository | [optional] 
 **website** | **str** | a URL with more information about the repository. | [optional] 
 
+## Example
+
+```python
+from swagger_client.models.edit_repo_option import EditRepoOption
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of EditRepoOption from a JSON string
+edit_repo_option_instance = EditRepoOption.from_json(json)
+# print the JSON string representation of the object
+print EditRepoOption.to_json()
+
+# convert the object into a dict
+edit_repo_option_dict = edit_repo_option_instance.to_dict()
+# create an instance of EditRepoOption from a dict
+edit_repo_option_form_dict = edit_repo_option.from_dict(edit_repo_option_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

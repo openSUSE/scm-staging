@@ -1,11 +1,13 @@
 # PullRequest
 
+PullRequest represents a pull request
+
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **allow_maintainer_edit** | **bool** |  | [optional] 
 **assignee** | [**User**](User.md) |  | [optional] 
-**assignees** | [**list[User]**](User.md) |  | [optional] 
+**assignees** | [**List[User]**](User.md) |  | [optional] 
 **base** | [**PRBranchInfo**](PRBranchInfo.md) |  | [optional] 
 **body** | **str** |  | [optional] 
 **closed_at** | **datetime** |  | [optional] 
@@ -17,7 +19,7 @@ Name | Type | Description | Notes
 **html_url** | **str** |  | [optional] 
 **id** | **int** |  | [optional] 
 **is_locked** | **bool** |  | [optional] 
-**labels** | [**list[Label]**](Label.md) |  | [optional] 
+**labels** | [**List[Label]**](Label.md) |  | [optional] 
 **merge_base** | **str** |  | [optional] 
 **merge_commit_sha** | **str** |  | [optional] 
 **mergeable** | **bool** |  | [optional] 
@@ -27,12 +29,29 @@ Name | Type | Description | Notes
 **milestone** | [**Milestone**](Milestone.md) |  | [optional] 
 **number** | **int** |  | [optional] 
 **patch_url** | **str** |  | [optional] 
-**state** | [**StateType**](StateType.md) |  | [optional] 
+**state** | **str** | StateType issue state type | [optional] 
 **title** | **str** |  | [optional] 
 **updated_at** | **datetime** |  | [optional] 
 **url** | **str** |  | [optional] 
 **user** | [**User**](User.md) |  | [optional] 
 
+## Example
+
+```python
+from swagger_client.models.pull_request import PullRequest
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of PullRequest from a JSON string
+pull_request_instance = PullRequest.from_json(json)
+# print the JSON string representation of the object
+print PullRequest.to_json()
+
+# convert the object into a dict
+pull_request_dict = pull_request_instance.to_dict()
+# create an instance of PullRequest from a dict
+pull_request_form_dict = pull_request.from_dict(pull_request_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 
