@@ -2,6 +2,7 @@ import asyncio
 from dataclasses import dataclass
 from enum import StrEnum, unique
 import os
+from aiohttp import ClientResponseError
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -286,7 +287,13 @@ async def webhook(payload: PullRequestPayload):
                 )
 
         await asyncio.gather(*tasks)
-        await project.delete(osc, prj=prj, force=True)
+        try:
+            await project.delete(osc, prj=prj, force=True)
+        except ClientResponseError as cre_exc:
+            if cre_exc.status == 404:
+                LOGGER.debug("Not deleting project %s, it doesn't exist", prj.name)
+            else:
+                raise
         return {}
 
     owner = payload.repository.owner.login

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from enum import StrEnum, auto
+from aiohttp import ClientResponseError
 from swagger_client.api.repository_api import RepositoryApi
 from swagger_client.api_client import ApiClient
 
@@ -31,9 +32,17 @@ async def set_commit_status_from_obs(
     pkg_name: str,
     project_name: str,
 ) -> None:
-    build_results = await fetch_build_result(
-        osc, project_name=project_name, package_name=pkg_name
-    )
+    # there's no build results (e.g. because the project & package do not exist)
+    # => do nothing
+    try:
+        build_results = await fetch_build_result(
+            osc, project_name=project_name, package_name=pkg_name
+        )
+    except ClientResponseError as cre_exc:
+        if cre_exc.status == 404:
+            return None
+        raise
+
     pkg_status_codes = set()
     for build_res in build_results:
         for st in build_res.status:
