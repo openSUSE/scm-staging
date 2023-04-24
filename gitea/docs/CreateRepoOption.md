@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **default_branch** | **str** | DefaultBranch of the repository (used when initializes and in template) | [optional] 
 **description** | **str** | Description of the repository to create | [optional] 
 **gitignores** | **str** | Gitignores to use | [optional] 
+**hash_type** | **str** | HashType of the underlying git repository | [optional] 
 **issue_labels** | **str** | Label-Set to use | [optional] 
 **license** | **str** | License to use | [optional] 
 **name** | **str** | Name of the repository to create | 

@@ -29,6 +29,7 @@ Name | Type | Description | Notes
 **has_projects** | **bool** |  | [optional] 
 **has_pull_requests** | **bool** |  | [optional] 
 **has_wiki** | **bool** |  | [optional] 
+**hash_type** | **str** |  | [optional] 
 **html_url** | **str** |  | [optional] 
 **id** | **int** |  | [optional] 
 **ignore_whitespace_conflicts** | **bool** |  | [optional] 

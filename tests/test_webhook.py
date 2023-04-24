@@ -1,6 +1,10 @@
 import os.path
 from fastapi.testclient import TestClient
 import pytest
+import scm_staging
+
+from scm_staging.webhook import AppConfig
+from tests.conftest import LOCAL_OSC_T
 
 PR_EVENTS: dict[str, str] = {}
 
@@ -20,10 +24,16 @@ for event in (
         PR_EVENTS[event[:-5]] = event_json.read(-1)
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "payload",
     (pytest.param(json, id=event_name) for event_name, json in PR_EVENTS.items()),
 )
-def test_parse_payload_smoke_test(payload: str, test_client: TestClient, mocker):
-    mocker.patch("scm_staging.obs.Osc.from_env")
-    test_client.post("/hook", content=payload)
+async def test_parse_payload_smoke_test(
+    payload: str, test_client: TestClient, local_osc: LOCAL_OSC_T
+):
+    async for osc, _ in local_osc:
+        scm_staging.webhook._app_config = AppConfig(
+            "irrelevant", "irrelevant", osc, "dest", None, None
+        )
+        test_client.post("/hook", content=payload)

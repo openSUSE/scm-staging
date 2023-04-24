@@ -29,7 +29,6 @@ mypy = ">=0.991"
 pytest = ">=7.2"
 httpx = ">=0.23"
 pytest-asyncio = ">=0.20"
-pytest-mock = ">=3.10"
 
 [build-system]
 requires = ["poetry-core"]
