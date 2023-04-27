@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -34,6 +33,8 @@ class CreateEmailOption(BaseModel):
     __properties = ["emails"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -61,7 +62,7 @@ class CreateEmailOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateEmailOption.parse_obj(obj)
 
         _obj = CreateEmailOption.parse_obj({"emails": obj.get("emails")})

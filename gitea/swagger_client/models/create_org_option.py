@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -32,7 +31,7 @@ class CreateOrgOption(BaseModel):
     full_name: Optional[StrictStr] = None
     location: Optional[StrictStr] = None
     repo_admin_change_team_access: Optional[StrictBool] = None
-    username: StrictStr = ...
+    username: StrictStr = Field(...)
     visibility: Optional[StrictStr] = Field(
         None,
         description="possible values are `public` (default), `limited` or `private`",
@@ -49,17 +48,20 @@ class CreateOrgOption(BaseModel):
     ]
 
     @validator("visibility")
-    def visibility_validate_enum(cls, v):
-        if v is None:
-            return v
+    def visibility_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
 
-        if v not in ("public", "limited", "private"):
+        if value not in ("public", "limited", "private"):
             raise ValueError(
                 "must be one of enum values ('public', 'limited', 'private')"
             )
-        return v
+        return value
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -87,7 +89,7 @@ class CreateOrgOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateOrgOption.parse_obj(obj)
 
         _obj = CreateOrgOption.parse_obj(

@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -33,6 +32,8 @@ class PullReviewRequestOptions(BaseModel):
     __properties = ["reviewers", "team_reviewers"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -60,7 +61,7 @@ class PullReviewRequestOptions(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return PullReviewRequestOptions.parse_obj(obj)
 
         _obj = PullReviewRequestOptions.parse_obj(

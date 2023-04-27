@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -36,7 +35,7 @@ class CreateHookOption(BaseModel):
         description='CreateHookOptionConfig has all config options in it required are "content_type" and "url" Required',
     )
     events: Optional[conlist(StrictStr)] = None
-    type: StrictStr = ...
+    type: StrictStr = Field(...)
     __properties = [
         "active",
         "authorization_header",
@@ -47,8 +46,9 @@ class CreateHookOption(BaseModel):
     ]
 
     @validator("type")
-    def type_validate_enum(cls, v):
-        if v not in (
+    def type_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in (
             "dingtalk",
             "discord",
             "gitea",
@@ -63,9 +63,11 @@ class CreateHookOption(BaseModel):
             raise ValueError(
                 "must be one of enum values ('dingtalk', 'discord', 'gitea', 'gogs', 'msteams', 'slack', 'telegram', 'feishu', 'wechatwork', 'packagist')"
             )
-        return v
+        return value
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -93,7 +95,7 @@ class CreateHookOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateHookOption.parse_obj(obj)
 
         _obj = CreateHookOption.parse_obj(

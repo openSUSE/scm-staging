@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -43,6 +42,8 @@ class MarkdownOption(BaseModel):
     __properties = ["Context", "Mode", "Text", "Wiki"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -70,7 +71,7 @@ class MarkdownOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return MarkdownOption.parse_obj(obj)
 
         _obj = MarkdownOption.parse_obj(

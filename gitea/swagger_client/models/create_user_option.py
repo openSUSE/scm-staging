@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -32,15 +31,15 @@ class CreateUserOption(BaseModel):
         None,
         description='For explicitly setting the user creation timestamp. Useful when users are migrated from other systems. When omitted, the user\'s creation timestamp will be set to "now".',
     )
-    email: StrictStr = ...
+    email: StrictStr = Field(...)
     full_name: Optional[StrictStr] = None
     login_name: Optional[StrictStr] = None
     must_change_password: Optional[StrictBool] = None
-    password: StrictStr = ...
+    password: StrictStr = Field(...)
     restricted: Optional[StrictBool] = None
     send_notify: Optional[StrictBool] = None
     source_id: Optional[StrictInt] = None
-    username: StrictStr = ...
+    username: StrictStr = Field(...)
     visibility: Optional[StrictStr] = None
     __properties = [
         "created_at",
@@ -57,6 +56,8 @@ class CreateUserOption(BaseModel):
     ]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -84,7 +85,7 @@ class CreateUserOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateUserOption.parse_obj(obj)
 
         _obj = CreateUserOption.parse_obj(

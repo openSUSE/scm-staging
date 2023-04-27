@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -36,6 +35,8 @@ class AccessToken(BaseModel):
     __properties = ["id", "name", "scopes", "sha1", "token_last_eight"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -63,7 +64,7 @@ class AccessToken(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return AccessToken.parse_obj(obj)
 
         _obj = AccessToken.parse_obj(

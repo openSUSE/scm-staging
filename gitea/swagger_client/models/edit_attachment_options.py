@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -32,6 +31,8 @@ class EditAttachmentOptions(BaseModel):
     __properties = ["name"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -59,7 +60,7 @@ class EditAttachmentOptions(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return EditAttachmentOptions.parse_obj(obj)
 
         _obj = EditAttachmentOptions.parse_obj({"name": obj.get("name")})

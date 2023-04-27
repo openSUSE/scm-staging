@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -36,7 +35,7 @@ class CreateIssueOption(BaseModel):
     labels: Optional[conlist(StrictInt)] = Field(None, description="list of label ids")
     milestone: Optional[StrictInt] = Field(None, description="milestone id")
     ref: Optional[StrictStr] = None
-    title: StrictStr = ...
+    title: StrictStr = Field(...)
     __properties = [
         "assignee",
         "assignees",
@@ -50,6 +49,8 @@ class CreateIssueOption(BaseModel):
     ]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -77,7 +78,7 @@ class CreateIssueOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateIssueOption.parse_obj(obj)
 
         _obj = CreateIssueOption.parse_obj(

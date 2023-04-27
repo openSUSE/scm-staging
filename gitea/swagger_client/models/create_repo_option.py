@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -73,26 +72,35 @@ class CreateRepoOption(BaseModel):
     ]
 
     @validator("hash_type")
-    def hash_type_validate_enum(cls, v):
-        if v is None:
-            return v
+    def hash_type_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
 
-        if v not in ("sha1", "sha256"):
+        if value not in ("sha1", "sha256"):
             raise ValueError("must be one of enum values ('sha1', 'sha256')")
-        return v
+        return value
 
     @validator("trust_model")
-    def trust_model_validate_enum(cls, v):
-        if v is None:
-            return v
+    def trust_model_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
 
-        if v not in ("default", "collaborator", "committer", "collaboratorcommitter"):
+        if value not in (
+            "default",
+            "collaborator",
+            "committer",
+            "collaboratorcommitter",
+        ):
             raise ValueError(
                 "must be one of enum values ('default', 'collaborator', 'committer', 'collaboratorcommitter')"
             )
-        return v
+        return value
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -120,7 +128,7 @@ class CreateRepoOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateRepoOption.parse_obj(obj)
 
         _obj = CreateRepoOption.parse_obj(

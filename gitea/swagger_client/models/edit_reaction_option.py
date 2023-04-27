@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -32,6 +31,8 @@ class EditReactionOption(BaseModel):
     __properties = ["content"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -59,7 +60,7 @@ class EditReactionOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return EditReactionOption.parse_obj(obj)
 
         _obj = EditReactionOption.parse_obj({"content": obj.get("content")})

@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -31,7 +30,7 @@ class MigrateRepoOptions(BaseModel):
     auth_password: Optional[StrictStr] = None
     auth_token: Optional[StrictStr] = None
     auth_username: Optional[StrictStr] = None
-    clone_addr: StrictStr = ...
+    clone_addr: StrictStr = Field(...)
     description: Optional[StrictStr] = None
     issues: Optional[StrictBool] = None
     labels: Optional[StrictBool] = None
@@ -43,7 +42,7 @@ class MigrateRepoOptions(BaseModel):
     private: Optional[StrictBool] = None
     pull_requests: Optional[StrictBool] = None
     releases: Optional[StrictBool] = None
-    repo_name: StrictStr = ...
+    repo_name: StrictStr = Field(...)
     repo_owner: Optional[StrictStr] = Field(
         None,
         description="Name of User or Organisation who will own Repo after migration",
@@ -77,17 +76,20 @@ class MigrateRepoOptions(BaseModel):
     ]
 
     @validator("service")
-    def service_validate_enum(cls, v):
-        if v is None:
-            return v
+    def service_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
 
-        if v not in ("git", "github", "gitea", "gitlab"):
+        if value not in ("git", "github", "gitea", "gitlab"):
             raise ValueError(
                 "must be one of enum values ('git', 'github', 'gitea', 'gitlab')"
             )
-        return v
+        return value
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -115,7 +117,7 @@ class MigrateRepoOptions(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return MigrateRepoOptions.parse_obj(obj)
 
         _obj = MigrateRepoOptions.parse_obj(

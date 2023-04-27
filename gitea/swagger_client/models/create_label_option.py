@@ -13,14 +13,13 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
 
 
 from typing import Optional
-from pydantic import BaseModel, StrictBool, StrictStr
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 
 class CreateLabelOption(BaseModel):
@@ -28,13 +27,15 @@ class CreateLabelOption(BaseModel):
     CreateLabelOption options for creating a label
     """
 
-    color: StrictStr = ...
+    color: StrictStr = Field(...)
     description: Optional[StrictStr] = None
     exclusive: Optional[StrictBool] = None
-    name: StrictStr = ...
+    name: StrictStr = Field(...)
     __properties = ["color", "description", "exclusive", "name"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -62,7 +63,7 @@ class CreateLabelOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateLabelOption.parse_obj(obj)
 
         _obj = CreateLabelOption.parse_obj(
