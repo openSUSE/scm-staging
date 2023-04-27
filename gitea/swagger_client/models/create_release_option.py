@@ -13,14 +13,13 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
 
 
 from typing import Optional
-from pydantic import BaseModel, StrictBool, StrictStr
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 
 class CreateReleaseOption(BaseModel):
@@ -32,7 +31,7 @@ class CreateReleaseOption(BaseModel):
     draft: Optional[StrictBool] = None
     name: Optional[StrictStr] = None
     prerelease: Optional[StrictBool] = None
-    tag_name: StrictStr = ...
+    tag_name: StrictStr = Field(...)
     target_commitish: Optional[StrictStr] = None
     __properties = [
         "body",
@@ -44,6 +43,8 @@ class CreateReleaseOption(BaseModel):
     ]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -71,7 +72,7 @@ class CreateReleaseOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateReleaseOption.parse_obj(obj)
 
         _obj = CreateReleaseOption.parse_obj(

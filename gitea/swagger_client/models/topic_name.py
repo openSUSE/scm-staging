@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -32,6 +31,8 @@ class TopicName(BaseModel):
     __properties = ["topics"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -59,7 +60,7 @@ class TopicName(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return TopicName.parse_obj(obj)
 
         _obj = TopicName.parse_obj({"topics": obj.get("topics")})

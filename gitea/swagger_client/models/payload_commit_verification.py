@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -37,6 +36,8 @@ class PayloadCommitVerification(BaseModel):
     __properties = ["payload", "reason", "signature", "signer", "verified"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -67,7 +68,7 @@ class PayloadCommitVerification(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return PayloadCommitVerification.parse_obj(obj)
 
         _obj = PayloadCommitVerification.parse_obj(

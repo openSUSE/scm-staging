@@ -13,13 +13,12 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
 
 
-from pydantic import BaseModel, StrictStr
+from pydantic import BaseModel, Field, StrictStr
 
 
 class EditIssueCommentOption(BaseModel):
@@ -27,10 +26,12 @@ class EditIssueCommentOption(BaseModel):
     EditIssueCommentOption options for editing a comment
     """
 
-    body: StrictStr = ...
+    body: StrictStr = Field(...)
     __properties = ["body"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -58,7 +59,7 @@ class EditIssueCommentOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return EditIssueCommentOption.parse_obj(obj)
 
         _obj = EditIssueCommentOption.parse_obj({"body": obj.get("body")})

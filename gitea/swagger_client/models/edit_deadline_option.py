@@ -13,14 +13,13 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class EditDeadlineOption(BaseModel):
@@ -28,10 +27,12 @@ class EditDeadlineOption(BaseModel):
     EditDeadlineOption options for creating a deadline
     """
 
-    due_date: datetime = ...
+    due_date: datetime = Field(...)
     __properties = ["due_date"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -59,7 +60,7 @@ class EditDeadlineOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return EditDeadlineOption.parse_obj(obj)
 
         _obj = EditDeadlineOption.parse_obj({"due_date": obj.get("due_date")})

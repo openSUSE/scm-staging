@@ -13,14 +13,13 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
 
 
 from typing import Optional
-from pydantic import BaseModel, StrictBool, StrictInt, StrictStr
+from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 
 
 class EditUserOption(BaseModel):
@@ -37,13 +36,13 @@ class EditUserOption(BaseModel):
     email: Optional[StrictStr] = None
     full_name: Optional[StrictStr] = None
     location: Optional[StrictStr] = None
-    login_name: StrictStr = ...
+    login_name: StrictStr = Field(...)
     max_repo_creation: Optional[StrictInt] = None
     must_change_password: Optional[StrictBool] = None
     password: Optional[StrictStr] = None
     prohibit_login: Optional[StrictBool] = None
     restricted: Optional[StrictBool] = None
-    source_id: StrictInt = ...
+    source_id: StrictInt = Field(...)
     visibility: Optional[StrictStr] = None
     website: Optional[StrictStr] = None
     __properties = [
@@ -68,6 +67,8 @@ class EditUserOption(BaseModel):
     ]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -95,7 +96,7 @@ class EditUserOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return EditUserOption.parse_obj(obj)
 
         _obj = EditUserOption.parse_obj(

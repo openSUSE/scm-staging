@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -51,6 +50,8 @@ class DeployKey(BaseModel):
     ]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -81,7 +82,7 @@ class DeployKey(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return DeployKey.parse_obj(obj)
 
         _obj = DeployKey.parse_obj(

@@ -13,14 +13,13 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
 
 
 from typing import Optional
-from pydantic import BaseModel, StrictStr
+from pydantic import BaseModel, Field, StrictStr
 
 
 class CreateTagOption(BaseModel):
@@ -29,11 +28,13 @@ class CreateTagOption(BaseModel):
     """
 
     message: Optional[StrictStr] = None
-    tag_name: StrictStr = ...
+    tag_name: StrictStr = Field(...)
     target: Optional[StrictStr] = None
     __properties = ["message", "tag_name", "target"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -61,7 +62,7 @@ class CreateTagOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateTagOption.parse_obj(obj)
 
         _obj = CreateTagOption.parse_obj(

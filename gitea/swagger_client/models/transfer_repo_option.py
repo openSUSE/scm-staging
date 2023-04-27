@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -28,7 +27,7 @@ class TransferRepoOption(BaseModel):
     TransferRepoOption options when transfer a repository's ownership
     """
 
-    new_owner: StrictStr = ...
+    new_owner: StrictStr = Field(...)
     team_ids: Optional[conlist(StrictInt)] = Field(
         None,
         description="ID of the team or teams to add to the repository. Teams can only be added to organization-owned repositories.",
@@ -36,6 +35,8 @@ class TransferRepoOption(BaseModel):
     __properties = ["new_owner", "team_ids"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -63,7 +64,7 @@ class TransferRepoOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return TransferRepoOption.parse_obj(obj)
 
         _obj = TransferRepoOption.parse_obj(

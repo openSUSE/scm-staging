@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -35,15 +34,18 @@ class CreateMilestoneOption(BaseModel):
     __properties = ["description", "due_on", "state", "title"]
 
     @validator("state")
-    def state_validate_enum(cls, v):
-        if v is None:
-            return v
+    def state_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
 
-        if v not in ("open", "closed"):
+        if value not in ("open", "closed"):
             raise ValueError("must be one of enum values ('open', 'closed')")
-        return v
+        return value
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -71,7 +73,7 @@ class CreateMilestoneOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateMilestoneOption.parse_obj(obj)
 
         _obj = CreateMilestoneOption.parse_obj(

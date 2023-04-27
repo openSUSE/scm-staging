@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -48,14 +47,23 @@ class MergePullRequestOption(BaseModel):
     ]
 
     @validator("do")
-    def do_validate_enum(cls, v):
-        if v not in ("merge", "rebase", "rebase-merge", "squash", "manually-merged"):
+    def do_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in (
+            "merge",
+            "rebase",
+            "rebase-merge",
+            "squash",
+            "manually-merged",
+        ):
             raise ValueError(
                 "must be one of enum values ('merge', 'rebase', 'rebase-merge', 'squash', 'manually-merged')"
             )
-        return v
+        return value
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -83,7 +91,7 @@ class MergePullRequestOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return MergePullRequestOption.parse_obj(obj)
 
         _obj = MergePullRequestOption.parse_obj(

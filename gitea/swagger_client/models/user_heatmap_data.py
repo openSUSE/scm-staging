@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -35,6 +34,8 @@ class UserHeatmapData(BaseModel):
     __properties = ["contributions", "timestamp"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -62,7 +63,7 @@ class UserHeatmapData(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return UserHeatmapData.parse_obj(obj)
 
         _obj = UserHeatmapData.parse_obj(

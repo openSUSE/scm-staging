@@ -13,14 +13,13 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
 
 
 from typing import Dict, List, Optional
-from pydantic import BaseModel, StrictBool, StrictStr, conlist, validator
+from pydantic import BaseModel, Field, StrictBool, StrictStr, conlist, validator
 
 
 class CreateTeamOption(BaseModel):
@@ -31,7 +30,7 @@ class CreateTeamOption(BaseModel):
     can_create_org_repo: Optional[StrictBool] = None
     description: Optional[StrictStr] = None
     includes_all_repositories: Optional[StrictBool] = None
-    name: StrictStr = ...
+    name: StrictStr = Field(...)
     permission: Optional[StrictStr] = None
     units: Optional[conlist(StrictStr)] = None
     units_map: Optional[Dict[str, StrictStr]] = None
@@ -46,15 +45,18 @@ class CreateTeamOption(BaseModel):
     ]
 
     @validator("permission")
-    def permission_validate_enum(cls, v):
-        if v is None:
-            return v
+    def permission_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
 
-        if v not in ("read", "write", "admin"):
+        if value not in ("read", "write", "admin"):
             raise ValueError("must be one of enum values ('read', 'write', 'admin')")
-        return v
+        return value
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -82,7 +84,7 @@ class CreateTeamOption(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return CreateTeamOption.parse_obj(obj)
 
         _obj = CreateTeamOption.parse_obj(

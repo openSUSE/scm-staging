@@ -13,7 +13,6 @@
 
 
 from __future__ import annotations
-from inspect import getfullargspec
 import pprint
 import re  # noqa: F401
 import json
@@ -41,6 +40,8 @@ class AnnotatedTag(BaseModel):
     __properties = ["message", "object", "sha", "tag", "tagger", "url", "verification"]
 
     class Config:
+        """Pydantic configuration"""
+
         allow_population_by_field_name = True
         validate_assignment = True
 
@@ -77,7 +78,7 @@ class AnnotatedTag(BaseModel):
         if obj is None:
             return None
 
-        if type(obj) is not dict:
+        if not isinstance(obj, dict):
             return AnnotatedTag.parse_obj(obj)
 
         _obj = AnnotatedTag.parse_obj(
