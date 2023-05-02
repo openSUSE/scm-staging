@@ -13,6 +13,7 @@
 
 
 import re  # noqa: F401
+import io
 
 from pydantic import validate_arguments, ValidationError
 from typing_extensions import Annotated
@@ -20,9 +21,9 @@ from typing import overload, Optional, Union, Awaitable
 
 from datetime import datetime
 
-from pydantic import Field, StrictBool, StrictInt, StrictStr, conlist
+from pydantic import Field, StrictBool, StrictBytes, StrictInt, StrictStr, conlist
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from swagger_client.models.add_collaborator_option import AddCollaboratorOption
 from swagger_client.models.annotated_tag import AnnotatedTag
@@ -452,7 +453,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -669,7 +670,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -896,7 +897,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -2247,7 +2248,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Content-Type`
@@ -2448,7 +2449,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -3038,7 +3039,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -3842,7 +3843,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -4050,7 +4051,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -4278,7 +4279,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -4487,7 +4488,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -4693,7 +4694,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -4900,7 +4901,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -5127,7 +5128,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -5356,7 +5357,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -5566,7 +5567,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -5625,7 +5626,8 @@ class RepositoryApi(object):
         repo: Annotated[StrictStr, Field(..., description="name of the repo")],
         id: Annotated[StrictInt, Field(..., description="id of the release")],
         attachment: Annotated[
-            StrictStr, Field(..., description="attachment to upload")
+            Union[StrictBytes, StrictStr],
+            Field(..., description="attachment to upload"),
         ],
         name: Annotated[
             Optional[StrictStr], Field(description="name of the attachment")
@@ -5641,7 +5643,8 @@ class RepositoryApi(object):
         repo: Annotated[StrictStr, Field(..., description="name of the repo")],
         id: Annotated[StrictInt, Field(..., description="id of the release")],
         attachment: Annotated[
-            StrictStr, Field(..., description="attachment to upload")
+            Union[StrictBytes, StrictStr],
+            Field(..., description="attachment to upload"),
         ],
         name: Annotated[
             Optional[StrictStr], Field(description="name of the attachment")
@@ -5658,7 +5661,8 @@ class RepositoryApi(object):
         repo: Annotated[StrictStr, Field(..., description="name of the repo")],
         id: Annotated[StrictInt, Field(..., description="id of the release")],
         attachment: Annotated[
-            StrictStr, Field(..., description="attachment to upload")
+            Union[StrictBytes, StrictStr],
+            Field(..., description="attachment to upload"),
         ],
         name: Annotated[
             Optional[StrictStr], Field(description="name of the attachment")
@@ -5713,7 +5717,8 @@ class RepositoryApi(object):
         repo: Annotated[StrictStr, Field(..., description="name of the repo")],
         id: Annotated[StrictInt, Field(..., description="id of the release")],
         attachment: Annotated[
-            StrictStr, Field(..., description="attachment to upload")
+            Union[StrictBytes, StrictStr],
+            Field(..., description="attachment to upload"),
         ],
         name: Annotated[
             Optional[StrictStr], Field(description="name of the attachment")
@@ -6030,7 +6035,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -6239,7 +6244,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -6450,7 +6455,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -7452,7 +7457,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -8463,7 +8468,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Content-Type`
@@ -10265,7 +10270,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -10968,7 +10973,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -11189,7 +11194,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -11408,7 +11413,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -11628,7 +11633,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -11855,7 +11860,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -12076,7 +12081,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -12313,7 +12318,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -12530,7 +12535,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -25133,7 +25138,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Content-Type`
@@ -25307,7 +25312,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -26969,7 +26974,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -27753,7 +27758,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -28202,7 +28207,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -28629,7 +28634,7 @@ class RepositoryApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Content-Type`

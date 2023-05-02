@@ -13,6 +13,7 @@
 
 
 import re  # noqa: F401
+import io
 
 from pydantic import validate_arguments, ValidationError
 from typing_extensions import Annotated
@@ -195,7 +196,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -686,7 +687,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -867,7 +868,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -1247,7 +1248,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -1445,7 +1446,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -4518,7 +4519,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["form"]:
+        if _params["form"] is not None:
             _body_params = _params["form"]
 
         # set the HTTP header `Accept`
@@ -4699,7 +4700,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -5738,7 +5739,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Content-Type`
@@ -9575,7 +9576,7 @@ class UserApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
