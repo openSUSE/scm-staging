@@ -13,6 +13,7 @@
 
 
 import re  # noqa: F401
+import io
 
 from pydantic import validate_arguments, ValidationError
 from typing_extensions import Annotated
@@ -199,7 +200,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -397,7 +398,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -1139,7 +1140,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["organization"]:
+        if _params["organization"] is not None:
             _body_params = _params["organization"]
 
         # set the HTTP header `Accept`
@@ -1334,7 +1335,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -1527,7 +1528,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -1721,7 +1722,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -2801,7 +2802,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -3005,7 +3006,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -3209,7 +3210,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
@@ -3403,7 +3404,7 @@ class OrganizationApi(object):
         _files = {}
         # process the body parameter
         _body_params = None
-        if _params["body"]:
+        if _params["body"] is not None:
             _body_params = _params["body"]
 
         # set the HTTP header `Accept`
