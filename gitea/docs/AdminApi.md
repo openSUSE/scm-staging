@@ -12,7 +12,7 @@ Method | HTTP request | Description
 [**admin_create_user**](AdminApi.md#admin_create_user) | **POST** /admin/users | Create a user
 [**admin_cron_list**](AdminApi.md#admin_cron_list) | **GET** /admin/cron | List cron tasks
 [**admin_cron_run**](AdminApi.md#admin_cron_run) | **POST** /admin/cron/{task} | Run cron task
-[**admin_delete_hook**](AdminApi.md#admin_delete_hook) | **DELETE** /amdin/hooks/{id} | Delete a hook
+[**admin_delete_hook**](AdminApi.md#admin_delete_hook) | **DELETE** /admin/hooks/{id} | Delete a hook
 [**admin_delete_unadopted_repository**](AdminApi.md#admin_delete_unadopted_repository) | **DELETE** /admin/unadopted/{owner}/{repo} | Delete unadopted files
 [**admin_delete_user**](AdminApi.md#admin_delete_user) | **DELETE** /admin/users/{username} | Delete a user
 [**admin_delete_user_public_key**](AdminApi.md#admin_delete_user_public_key) | **DELETE** /admin/users/{username}/keys/{id} | Delete a user&#39;s public key
