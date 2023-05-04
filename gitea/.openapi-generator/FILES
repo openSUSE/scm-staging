@@ -189,6 +189,7 @@ swagger_client/api/repository_api.py
 swagger_client/api/settings_api.py
 swagger_client/api/user_api.py
 swagger_client/api_client.py
+swagger_client/api_response.py
 swagger_client/configuration.py
 swagger_client/exceptions.py
 swagger_client/models/__init__.py
