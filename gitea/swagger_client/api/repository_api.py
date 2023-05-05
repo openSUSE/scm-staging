@@ -14,6 +14,7 @@
 
 import re  # noqa: F401
 import io
+import warnings
 
 from pydantic import validate_arguments, ValidationError
 from typing_extensions import Annotated
@@ -29617,7 +29618,7 @@ class RepositoryApi(object):
         async_req: Optional[bool] = None,
         **kwargs
     ) -> Union[List[TrackedTime], Awaitable[List[TrackedTime]]]:  # noqa: E501
-        """List a user's tracked times in a repo  # noqa: E501
+        """(Deprecated) List a user's tracked times in a repo  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
@@ -29661,7 +29662,7 @@ class RepositoryApi(object):
         user: Annotated[StrictStr, Field(..., description="username of user")],
         **kwargs
     ) -> ApiResponse:  # noqa: E501
-        """List a user's tracked times in a repo  # noqa: E501
+        """(Deprecated) List a user's tracked times in a repo  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
@@ -29699,6 +29700,10 @@ class RepositoryApi(object):
                  returns the request thread.
         :rtype: tuple(List[TrackedTime], status_code(int), headers(HTTPHeaderDict))
         """
+
+        warnings.warn(
+            "GET /repos/{owner}/{repo}/times/{user} is deprecated.", DeprecationWarning
+        )
 
         _params = locals()
 

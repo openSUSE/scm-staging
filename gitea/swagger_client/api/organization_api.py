@@ -14,6 +14,7 @@
 
 import re  # noqa: F401
 import io
+import warnings
 
 from pydantic import validate_arguments, ValidationError
 from typing_extensions import Annotated
@@ -282,7 +283,7 @@ class OrganizationApi(object):
         async_req: Optional[bool] = None,
         **kwargs
     ) -> Union[Repository, Awaitable[Repository]]:  # noqa: E501
-        """Create a repository in an organization  # noqa: E501
+        """(Deprecated) Create a repository in an organization  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
@@ -323,7 +324,7 @@ class OrganizationApi(object):
         body: Optional[CreateRepoOption] = None,
         **kwargs
     ) -> ApiResponse:  # noqa: E501
-        """Create a repository in an organization  # noqa: E501
+        """(Deprecated) Create a repository in an organization  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
@@ -359,6 +360,8 @@ class OrganizationApi(object):
                  returns the request thread.
         :rtype: tuple(Repository, status_code(int), headers(HTTPHeaderDict))
         """
+
+        warnings.warn("POST /org/{org}/repos is deprecated.", DeprecationWarning)
 
         _params = locals()
 
