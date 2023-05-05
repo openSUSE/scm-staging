@@ -14,6 +14,7 @@
 
 import re  # noqa: F401
 import io
+import warnings
 
 from pydantic import validate_arguments, ValidationError
 from typing_extensions import Annotated
@@ -2870,7 +2871,7 @@ class IssueApi(object):
         async_req: Optional[bool] = None,
         **kwargs
     ) -> Union[None, Awaitable[None]]:  # noqa: E501
-        """Delete a comment  # noqa: E501
+        """(Deprecated) Delete a comment  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
@@ -2919,7 +2920,7 @@ class IssueApi(object):
         id: Annotated[StrictInt, Field(..., description="id of comment to delete")],
         **kwargs
     ) -> ApiResponse:  # noqa: E501
-        """Delete a comment  # noqa: E501
+        """(Deprecated) Delete a comment  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
@@ -2959,6 +2960,11 @@ class IssueApi(object):
                  returns the request thread.
         :rtype: None
         """
+
+        warnings.warn(
+            "DELETE /repos/{owner}/{repo}/issues/{index}/comments/{id} is deprecated.",
+            DeprecationWarning,
+        )
 
         _params = locals()
 
@@ -5167,7 +5173,7 @@ class IssueApi(object):
         async_req: Optional[bool] = None,
         **kwargs
     ) -> Union[Comment, Awaitable[Comment]]:  # noqa: E501
-        """Edit a comment  # noqa: E501
+        """(Deprecated) Edit a comment  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
@@ -5219,7 +5225,7 @@ class IssueApi(object):
         body: Optional[EditIssueCommentOption] = None,
         **kwargs
     ) -> ApiResponse:  # noqa: E501
-        """Edit a comment  # noqa: E501
+        """(Deprecated) Edit a comment  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
@@ -5261,6 +5267,11 @@ class IssueApi(object):
                  returns the request thread.
         :rtype: tuple(Comment, status_code(int), headers(HTTPHeaderDict))
         """
+
+        warnings.warn(
+            "PATCH /repos/{owner}/{repo}/issues/{index}/comments/{id} is deprecated.",
+            DeprecationWarning,
+        )
 
         _params = locals()
 
