@@ -7,7 +7,6 @@ license = "GPLv2.0-or-later"
 readme = "README.rst"
 packages = [
     { include = "scm_staging" },
-    { include = "swagger_client", from = "gitea" }
 ]
 
 [tool.poetry.dependencies]
@@ -15,13 +14,8 @@ python = "^3.11"
 fastapi = "^0.87.0"
 uvicorn = {extras = ["standard"], version = "^0.20"}
 aiohttp = "^3.8"
-# from gitea/requirements.txt
-certifi = ">= 14.05.14"
-six = ">= 1.10"
-python_dateutil = ">= 2.5.3"
-setuptools = ">= 21.0.0"
-urllib3 = ">= 1.15.1"
-aio-pika = "^8.3.0"
+py_obs = { git = "https://github.com/dcermak/py-obs.git", branch = "main" }
+py_gitea_opensuse_org = { git = "https://github.com/dcermak/py-gitea-opensuse-org.git", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
 black = ">=22.10"

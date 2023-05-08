@@ -2,13 +2,13 @@
 
 from enum import StrEnum, auto
 from aiohttp import ClientResponseError
-from swagger_client.api.repository_api import RepositoryApi
-from swagger_client.api_client import ApiClient
+from py_gitea_opensuse_org.api.repository_api import RepositoryApi
+from py_gitea_opensuse_org.api_client import ApiClient
 
-from swagger_client.models.create_status_option import CreateStatusOption
-from swagger_client.models.branch import Branch
-from scm_staging.build_result import PackageCode, fetch_build_result
-from scm_staging.obs import Osc
+from py_gitea_opensuse_org.models.create_status_option import CreateStatusOption
+from py_gitea_opensuse_org.models.branch import Branch
+from py_obs.build_result import PackageCode, fetch_build_result
+from py_obs.osc import Osc
 
 
 class CommitStatusState(StrEnum):

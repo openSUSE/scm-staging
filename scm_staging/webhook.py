@@ -7,7 +7,7 @@ from aiohttp import ClientResponseError
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from swagger_client import (
+from py_gitea_opensuse_org import (
     Configuration,
     ApiClient,
     IssueApi,
@@ -17,12 +17,12 @@ from swagger_client import (
 )
 from scm_staging.ci_status import set_commit_status_from_obs
 
-from scm_staging.obs import Osc
-from . import request
-from .request import RequestActionType
-from .request import RequestStatus
-from scm_staging.xml_factory import StrElementField
-from . import project
+from py_obs.osc import Osc
+from py_obs import request
+from py_obs.request import RequestActionType
+from py_obs.request import RequestStatus
+from py_obs.xml_factory import StrElementField
+from py_obs import project
 from scm_staging.logger import LOGGER
 
 app = FastAPI()

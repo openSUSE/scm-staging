@@ -5,8 +5,8 @@ import json
 from typing import TypedDict
 
 import aio_pika
-from swagger_client.api.repository_api import RepositoryApi
-from swagger_client.models.pull_request import PullRequest
+from py_gitea_opensuse_org.api.repository_api import RepositoryApi
+from py_gitea_opensuse_org.models.pull_request import PullRequest
 
 from scm_staging.ci_status import set_commit_status_from_obs
 from scm_staging.webhook import AppConfig
