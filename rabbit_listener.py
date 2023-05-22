@@ -3,8 +3,10 @@
 import asyncio
 import json
 from typing import TypedDict
+from pika.adapters.blocking_connection import BlockingChannel
+from pika.exchange_type import ExchangeType
+from pika.spec import Basic
 
-import aio_pika
 from py_gitea_opensuse_org.api.repository_api import RepositoryApi
 from py_gitea_opensuse_org.models.pull_request import PullRequest
 
@@ -78,51 +80,57 @@ async def pr_from_pkg_name(
     )
 
 
-async def main() -> None:
-    connection = await aio_pika.connect(
-        "amqps://opensuse:opensuse@rabbit.opensuse.org",
+import pika
+
+
+def main() -> None:
+    loop = asyncio.get_event_loop()
+    connection = pika.BlockingConnection(
+        pika.URLParameters("amqps://opensuse:opensuse@rabbit.opensuse.org")
+    )
+    channel = connection.channel()
+
+    channel.exchange_declare(
+        exchange="pubsub", exchange_type=ExchangeType.topic, passive=True, durable=True
     )
 
-    channel = await connection.channel()
-    queue = await channel.declare_queue(exclusive=True, auto_delete=True)
+    result = channel.queue_declare("", exclusive=True)
+    queue_name = result.method.queue
+    assert queue_name
 
-    exchange = await channel.declare_exchange(
-        "pubsub", type=aio_pika.ExchangeType.TOPIC, passive=True, durable=True
-    )
-    await queue.bind(exchange, routing_key="#")
+    channel.queue_bind(exchange="pubsub", queue=queue_name, routing_key="#")
 
-    # Maximum message count which will be processing at the same time.
-    await channel.set_qos(prefetch_count=10)
+    def callback(
+        ch: BlockingChannel,
+        method: Basic.Deliver,
+        properties: pika.BasicProperties,
+        body: bytes,
+    ):
+        if (method.routing_key or "") not in (
+            f"{_PREFIX}.package.build_success",
+            f"{_PREFIX}.package.build_fail",
+            f"{_PREFIX}.package.build_unchanged",
+        ):
+            return
 
-    async with queue.iterator() as queue_iter:
-        async for message in queue_iter:
-            async with message.process():
-                if (message.routing_key or "") not in (
-                    f"{_PREFIX}.package.build_success",
-                    f"{_PREFIX}.package.build_fail",
-                    f"{_PREFIX}.package.build_unchanged",
-                ):
-                    continue
-
-                try:
-                    payload: PackageBuildSuccessPayload | PackageBuildFailurePayload = (
-                        json.loads(message.body.decode())
+        try:
+            payload: PackageBuildSuccessPayload | PackageBuildFailurePayload = (
+                json.loads(body.decode())
+            )
+            pr = loop.run_until_complete(pr_from_pkg_name(payload))
+            if pr:
+                loop.run_until_complete(
+                    update_commit_status(
+                        pr, pkg_name=payload["package"], prj_name=payload["project"]
                     )
-                    pr = await pr_from_pkg_name(payload)
-                    if pr:
-                        await update_commit_status(
-                            pr, pkg_name=payload["package"], prj_name=payload["project"]
-                        )
-                except Exception:
-                    pass
+                )
+        except Exception:
+            pass
 
-    # try:
-    #     # Wait until terminate
-    #     await asyncio.Future()
-    # finally:
-    await connection.close()
+    channel.basic_consume(queue_name, callback, auto_ack=True)
+
+    channel.start_consuming()
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    main()
