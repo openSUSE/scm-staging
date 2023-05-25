@@ -18,6 +18,10 @@ py_obs = { git = "https://github.com/dcermak/py-obs.git", branch = "main" }
 py_gitea_opensuse_org = { git = "https://github.com/dcermak/py-gitea-opensuse-org.git", branch = "main" }
 pika = "^1.3.2"
 
+[tool.poetry.scripts]
+submit_to_pool = "scm_staging.submit_to_pool:main"
+rabbit_listener = "scm_staging.rabbit_listener:main"
+
 [tool.poetry.group.dev.dependencies]
 black = ">=22.10"
 mypy = ">=0.991"

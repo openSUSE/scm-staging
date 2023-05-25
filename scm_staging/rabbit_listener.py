@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import asyncio
 import json
 from typing import TypedDict
@@ -130,7 +128,3 @@ def main() -> None:
     channel.basic_consume(queue_name, callback, auto_ack=True)
 
     channel.start_consuming()
-
-
-if __name__ == "__main__":
-    main()

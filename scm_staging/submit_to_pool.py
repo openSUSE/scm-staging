@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import asyncio
 import tempfile
 from git.remote import Remote
@@ -39,7 +37,7 @@ async def create_pr_to_pool(pkg_name: str, user: str, repo_api: RepositoryApi) -
     )
 
 
-if __name__ == "__main__":
+def main():
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -58,7 +56,7 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(
-            create_pr_to_pool(args.package_name[0], "defolos", repo_api)
+            create_pr_to_pool(args.package_name[0], conf.bot_user, repo_api)
         )
     finally:
         loop.run_until_complete(conf.osc.teardown())
