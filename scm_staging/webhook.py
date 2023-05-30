@@ -1,11 +1,12 @@
 import asyncio
+import json
 from dataclasses import dataclass
 from enum import StrEnum, unique
 import os
 from aiohttp import ClientResponseError
 
-from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+import tornado
 
 from py_gitea_opensuse_org import (
     Configuration,
@@ -15,17 +16,16 @@ from py_gitea_opensuse_org import (
     RepositoryApi,
     PullReview,
 )
-from scm_staging.ci_status import set_commit_status_from_obs
-
 from py_obs.osc import Osc
 from py_obs import request
 from py_obs.request import RequestActionType
 from py_obs.request import RequestStatus
 from py_obs.xml_factory import StrElementField
 from py_obs import project
-from scm_staging.logger import LOGGER
+from tornado.web import Application
 
-app = FastAPI()
+from scm_staging.ci_status import set_commit_status_from_obs
+from scm_staging.logger import LOGGER
 
 
 class User(BaseModel):
@@ -148,23 +148,6 @@ class AppConfig:
         )
 
 
-_app_config: AppConfig | None = None
-
-
-@app.on_event("startup")
-def load_app_config():
-    global _app_config
-    _app_config = AppConfig.from_env()
-
-
-@app.on_event("shutdown")
-async def teardown_osc():
-    global _app_config
-    if _app_config is not None:
-        await _app_config.osc.teardown()
-        _app_config = None
-
-
 def package_from_pull_request(payload: PullRequestPayload) -> project.Package:
     return project.Package(
         name=payload.repository.name,
@@ -173,179 +156,196 @@ def package_from_pull_request(payload: PullRequestPayload) -> project.Package:
     )
 
 
-def project_from_pull_request(payload: PullRequestPayload) -> project.Project:
-    assert _app_config
-    return project.Project(
-        name=f"home:{_app_config.bot_user}:SCM_STAGING:Factory:{payload.repository.name}:{payload.pull_request.number}",
-        title=StrElementField(
-            f"Project for Pull Request {payload.pull_request.number}"
-        ),
-        description=StrElementField(
-            f"Project for Pull Request {payload.pull_request.url}"
-        ),
-        person=[
-            project.Person(
-                userid=_app_config.bot_user, role=project.PersonRole.MAINTAINER
-            )
-        ],
-        repository=[
-            project.Repository(
-                name="openSUSE_Factory",
-                arch=["x86_64"],
-                path=[
-                    project.PathEntry(project="openSUSE:Factory", repository="snapshot")
-                ],
-            )
-        ],
-    )
+class MainHandler(tornado.web.RequestHandler):
+    def initialize(self, app_config: AppConfig) -> None:
+        self.app_config = app_config
 
-
-@app.get("/alive")
-async def am_i_alive():
-    return {}
-
-
-async def check_if_pr_approved(
-    osc: Osc,
-    api_client: ApiClient,
-    owner: str,
-    repo_name: str,
-    pr_number: int,
-    pkg_name: str,
-) -> bool:
-    """Checks if the pull request $owner/$repo_name/$pr_number has been approved
-    by at least one maintainer of the package `pkg_name` and no changes have
-    been requested.
-
-    """
-    repo_api = RepositoryApi(api_client)
-    reviews: list[PullReview] = await repo_api.repo_list_pull_reviews(
-        owner, repo_name, pr_number
-    )
-
-    maintainers = await project.search_for_maintainers(
-        osc, pkg_name=pkg_name, groups_to_ignore=["factory-maintainers"]
-    )
-    usernames: list[str] = []
-    if maintainers.package:
-        usernames.extend(pers.name for pers in maintainers.package)
-    if maintainers.project:
-        usernames.extend(pers.name for pers in maintainers.project)
-
-    usernames = list(set(usernames))
-
-    valid_reviews = []
-    for review in reviews:
-        if not review.stale and review.user.login in usernames:
-            valid_reviews.append(review)
-
-    if any(review.state == "REQUEST_CHANGES" for review in valid_reviews):
-        return False
-
-    if any(review.state == "APPROVED" for review in valid_reviews):
-        return True
-
-    return False
-
-
-@app.post("/hook")
-async def webhook(payload: PullRequestPayload):
-    assert _app_config
-
-    LOGGER.debug(payload)
-
-    if (
-        base := payload.pull_request.base
-    ).ref != _app_config.branch_name and base.label != _app_config.branch_name:
-        LOGGER.debug("wrong branch name %s", base.ref)
-        return {}
-
-    pkg = package_from_pull_request(payload)
-    prj = project_from_pull_request(payload)
-
-    osc = _app_config.osc
-
-    if payload.action in ("closed", "merged"):
-        tasks = []
-
-        reqs_to_close = await request.search_for_requests(
-            osc,
-            user=osc.username,
-            package=pkg,
-            project=prj,
-            types=[RequestActionType.SUBMIT],
-            states=[RequestStatus.NEW, RequestStatus.DECLINED, RequestStatus.REVIEW],
+    def project_from_pull_request(self, payload: PullRequestPayload) -> project.Project:
+        return project.Project(
+            name=f"home:{self.app_config.osc.username}:SCM_STAGING:Factory:{payload.repository.name}:{payload.pull_request.number}",
+            title=StrElementField(
+                f"Project for Pull Request {payload.pull_request.number}"
+            ),
+            description=StrElementField(
+                f"Project for Pull Request {payload.pull_request.url}"
+            ),
+            person=[
+                project.Person(
+                    userid=self.app_config.bot_user, role=project.PersonRole.MAINTAINER
+                )
+            ],
+            repository=[
+                project.Repository(
+                    name="openSUSE_Factory",
+                    arch=["x86_64"],
+                    path=[
+                        project.PathEntry(
+                            project="openSUSE:Factory", repository="snapshot"
+                        )
+                    ],
+                )
+            ],
         )
 
-        for req in reqs_to_close:
-            if req.id and req.creator == osc.username:
-                tasks.append(
-                    request.change_state(
-                        osc,
-                        request=req,
-                        new_state=RequestStatus.REVOKED,
-                        comment=f"pull request #{payload.pull_request.number} has been closed",
-                    )
-                )
+    async def check_if_pr_approved(
+        self,
+        api_client: ApiClient,
+        owner: str,
+        repo_name: str,
+        pr_number: int,
+        pkg_name: str,
+    ) -> bool:
+        """Checks if the pull request $owner/$repo_name/$pr_number has been approved
+        by at least one maintainer of the package `pkg_name` and no changes have
+        been requested.
 
-        await asyncio.gather(*tasks)
+        """
+        repo_api = RepositoryApi(api_client)
+        reviews: list[PullReview] = await repo_api.repo_list_pull_reviews(
+            owner, repo_name, pr_number
+        )
+
+        maintainers = await project.search_for_maintainers(
+            self.app_config.osc,
+            pkg_name=pkg_name,
+            groups_to_ignore=["factory-maintainers"],
+        )
+        usernames: list[str] = []
+        if maintainers.package:
+            usernames.extend(pers.name for pers in maintainers.package)
+        if maintainers.project:
+            usernames.extend(pers.name for pers in maintainers.project)
+
+        usernames = list(set(usernames))
+
+        valid_reviews = []
+        for review in reviews:
+            if not review.stale and review.user.login in usernames:
+                valid_reviews.append(review)
+
+        if any(review.state == "REQUEST_CHANGES" for review in valid_reviews):
+            return False
+
+        if any(review.state == "APPROVED" for review in valid_reviews):
+            return True
+
+        return False
+
+    async def post(self) -> None:
         try:
-            await project.delete(osc, prj=prj, force=True)
-        except ClientResponseError as cre_exc:
-            if cre_exc.status == 404:
-                LOGGER.debug("Not deleting project %s, it doesn't exist", prj.name)
-            else:
-                raise
-        return {}
+            payload = PullRequestPayload(**json.loads(self.request.body))
+        except ValidationError:
+            return
 
-    owner = payload.repository.owner.login
-    repo_name = payload.repository.name
-    pr_num = payload.pull_request.number
+        LOGGER.debug(payload)
 
-    await set_commit_status_from_obs(
-        _app_config.osc,
-        _app_config._api_client,
-        # use "upstream" here, otherwise the commit status will not show up in
-        # the PR and will not gate it
-        repo_owner=base.repo.owner.login,
-        repo_name=base.repo.name,
-        commit_sha=payload.pull_request.head.sha,
-        pkg_name=pkg.name,
-        project_name=prj.name,
-    )
+        if (
+            (base := payload.pull_request.base).ref != self.app_config.branch_name
+            and base.label != self.app_config.branch_name
+        ):
+            LOGGER.debug("wrong branch name %s", base.ref)
+            return
 
-    # don't create SRs for not approved PRs
-    if not await check_if_pr_approved(
-        _app_config.osc,
-        _app_config._api_client,
-        owner=owner,
-        repo_name=repo_name,
-        pr_number=pr_num,
-        pkg_name=pkg.name,
-    ):
-        return {}
+        pkg = package_from_pull_request(payload)
+        prj = self.project_from_pull_request(payload)
 
-    LOGGER.debug("PR has been approved, creating package")
-    await project.send_meta(osc, prj=prj)
-    await project.send_meta(osc, prj=prj, pkg=pkg)
+        osc = self.app_config.osc
 
-    new_req = await request.submit_package(
-        osc=osc,
-        source_prj=prj.name,
-        pkg_name=pkg.name,
-        dest_prj=_app_config.destination_project,
-        supersede_old_request=True,
-    )
+        if payload.action in ("closed", "merged"):
+            tasks = []
 
-    # comment on the PR with a link to the SR
-    issue_api = IssueApi(_app_config._api_client)
-    await issue_api.issue_create_comment(
-        payload.repository.owner.login,
-        payload.repository.name,
-        payload.pull_request.number,
-        body=CreateIssueCommentOption(
-            body=f"Created submit request [sr#{new_req.id}](https://build.opensuse.org/request/show/{new_req.id})"
-        ),
-    )
+            reqs_to_close = await request.search_for_requests(
+                osc,
+                user=osc.username,
+                package=pkg,
+                project=prj,
+                types=[RequestActionType.SUBMIT],
+                states=[
+                    RequestStatus.NEW,
+                    RequestStatus.DECLINED,
+                    RequestStatus.REVIEW,
+                ],
+            )
 
-    return {}
+            for req in reqs_to_close:
+                if req.id and req.creator == osc.username:
+                    tasks.append(
+                        request.change_state(
+                            osc,
+                            request=req,
+                            new_state=RequestStatus.REVOKED,
+                            comment=f"pull request #{payload.pull_request.number} has been closed",
+                        )
+                    )
+
+            await asyncio.gather(*tasks)
+            try:
+                await project.delete(osc, prj=prj, force=True)
+            except ClientResponseError as cre_exc:
+                if cre_exc.status == 404:
+                    LOGGER.debug("Not deleting project %s, it doesn't exist", prj.name)
+                else:
+                    raise
+            return
+
+        owner = payload.repository.owner.login
+        repo_name = payload.repository.name
+        pr_num = payload.pull_request.number
+
+        await set_commit_status_from_obs(
+            self.app_config.osc,
+            self.app_config._api_client,
+            # use "upstream" here, otherwise the commit status will not show up in
+            # the PR and will not gate it
+            repo_owner=base.repo.owner.login,
+            repo_name=base.repo.name,
+            commit_sha=payload.pull_request.head.sha,
+            pkg_name=pkg.name,
+            project_name=prj.name,
+        )
+
+        # don't create SRs for not approved PRs
+        if not await self.check_if_pr_approved(
+            self.app_config._api_client,
+            owner=owner,
+            repo_name=repo_name,
+            pr_number=pr_num,
+            pkg_name=pkg.name,
+        ):
+            return
+
+        LOGGER.debug("PR has been approved, creating package")
+        await project.send_meta(osc, prj=prj)
+        await project.send_meta(osc, prj=prj, pkg=pkg)
+
+        new_req = await request.submit_package(
+            osc=osc,
+            source_prj=prj.name,
+            pkg_name=pkg.name,
+            dest_prj=self.app_config.destination_project,
+            supersede_old_request=True,
+        )
+
+        # comment on the PR with a link to the SR
+        issue_api = IssueApi(self.app_config._api_client)
+        await issue_api.issue_create_comment(
+            payload.repository.owner.login,
+            payload.repository.name,
+            payload.pull_request.number,
+            body=CreateIssueCommentOption(
+                body=f"Created submit request [sr#{new_req.id}](https://build.opensuse.org/request/show/{new_req.id})"
+            ),
+        )
+
+
+def make_app(app_config: AppConfig) -> Application:
+    return Application([(r"/hook", MainHandler, {"app_config": app_config})])
+
+
+async def main():
+    app_config = AppConfig.from_env()
+    app = make_app(app_config)
+    app.listen(8000)
+    shutdown_event = asyncio.Event()
+    await shutdown_event.wait()
+    await app_config.osc.teardown()
