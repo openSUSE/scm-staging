@@ -116,7 +116,7 @@ class PullRequestPayload(BaseModel):
 
 @dataclass(frozen=True)
 class AppConfig:
-    bot_user: str
+    gitea_user: str
     branch_name: str
     osc: Osc
     destination_project: str
@@ -138,7 +138,7 @@ class AppConfig:
 
         return AppConfig(
             osc=(osc := Osc.from_env()),
-            bot_user=os.getenv("BOT_USER", osc.username),
+            gitea_user=os.getenv("BOT_USER", osc.username),
             branch_name=os.getenv("BRANCH_NAME", "factory"),
             destination_project=os.getenv(
                 "DESTINATION_PROJECT", "devel:Factory:git-workflow:mold:core"
@@ -171,7 +171,8 @@ class MainHandler(tornado.web.RequestHandler):
             ),
             person=[
                 project.Person(
-                    userid=self.app_config.bot_user, role=project.PersonRole.MAINTAINER
+                    userid=self.app_config.osc.username,
+                    role=project.PersonRole.MAINTAINER,
                 )
             ],
             repository=[

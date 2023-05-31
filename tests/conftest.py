@@ -18,7 +18,7 @@ class TestWebhook(AsyncHTTPTestCase):
 
         return make_app(
             AppConfig(
-                bot_user="foobar",
+                gitea_user="foobar",
                 branch_name="factory",
                 osc=local,
                 destination_project="don:t:matter",

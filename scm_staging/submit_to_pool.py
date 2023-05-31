@@ -10,12 +10,14 @@ from git.repo import Repo
 from scm_staging.webhook import AppConfig
 
 
-async def create_pr_to_pool(pkg_name: str, user: str, repo_api: RepositoryApi) -> None:
+async def create_pr_to_pool(
+    pkg_name: str, gitea_user: str, repo_api: RepositoryApi
+) -> None:
     await repo_api.create_fork(owner="pool", repo=pkg_name)
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         repo = Repo.clone_from(
-            url=f"gitea@gitea.opensuse.org:{user}/{pkg_name}.git", to_path=tmp_dir
+            url=f"gitea@gitea.opensuse.org:{gitea_user}/{pkg_name}.git", to_path=tmp_dir
         )
         remote = Remote.create(
             repo=repo, name="rpm", url=f"https://gitea.opensuse.org/rpm/{pkg_name}"
@@ -32,7 +34,7 @@ async def create_pr_to_pool(pkg_name: str, user: str, repo_api: RepositoryApi) -
         "pool",
         pkg_name,
         CreatePullRequestOption(
-            base="factory", head=f"{user}:factory", title="Sync package with rpm/"
+            base="factory", head=f"{gitea_user}:factory", title="Sync package with rpm/"
         ),
     )
 
@@ -56,7 +58,7 @@ def main():
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(
-            create_pr_to_pool(args.package_name[0], conf.bot_user, repo_api)
+            create_pr_to_pool(args.package_name[0], conf.gitea_user, repo_api)
         )
     finally:
         loop.run_until_complete(conf.osc.teardown())
