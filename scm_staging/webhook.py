@@ -233,6 +233,9 @@ class MainHandler(tornado.web.RequestHandler):
         return False
 
     async def post(self) -> None:
+        if not self.request.body:
+            return
+
         try:
             payload = PullRequestPayload(**json.loads(self.request.body))
         except ValidationError:
