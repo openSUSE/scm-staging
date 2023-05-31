@@ -346,10 +346,11 @@ def make_app(app_config: AppConfig) -> Application:
     return Application([(r"/hook", MainHandler, {"app_config": app_config})])
 
 
-async def main():
+def main():
     app_config = AppConfig.from_env()
     app = make_app(app_config)
     app.listen(8000)
     shutdown_event = asyncio.Event()
-    await shutdown_event.wait()
-    await app_config.osc.teardown()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(shutdown_event.wait())
+    loop.run_until_complete(app_config.osc.teardown())
