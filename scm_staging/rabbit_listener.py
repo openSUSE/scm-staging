@@ -63,7 +63,7 @@ async def pr_from_pkg_name(
     | PackageBuildFailurePayload
     | PackageBuildUnchangedPayload,
 ) -> PullRequest | None:
-    if not f"home:{_app_config.bot_user}:SCM_STAGING:Factory" in payload["project"]:
+    if not f"home:{_app_config.osc.username}:SCM_STAGING:Factory" in payload["project"]:
         return None
 
     repo_api = RepositoryApi(_app_config._api_client)
