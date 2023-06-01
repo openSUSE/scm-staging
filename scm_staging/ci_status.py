@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""This module contains helper functions to set the commit status (= CI status)
+on gitea based on the package build on OBS.
+
+"""
 
 from enum import StrEnum, auto
 from aiohttp import ClientResponseError

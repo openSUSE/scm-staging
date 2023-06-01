@@ -1,3 +1,8 @@
+"""This module holds the functions listening to the rabbitmq bus of OBS for
+package build results and updating the commit status.
+
+"""
+
 import asyncio
 import json
 from typing import TypedDict

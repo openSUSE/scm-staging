@@ -27,6 +27,26 @@ jobs:
           poetry install
           poetry run black --check --diff .
 
+
+  docs:
+    name: build the documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: poetry-${{ hashFiles('poetry.lock') }}
+
+      - run: |
+          pip install --upgrade poetry
+          poetry install
+          poetry run sphinx-build -W source/ build/
+
   ci:
     name: Run the integration tests
     runs-on: ubuntu-latest
