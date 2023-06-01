@@ -9,14 +9,26 @@ from typing import TypedDict
 from pika.adapters.blocking_connection import BlockingChannel
 from pika.exchange_type import ExchangeType
 from pika.spec import Basic
+import pika
 import pika.exceptions
 from py_gitea_opensuse_org import ApiClient
 
+
+from typing import NotRequired, TypedDict
+from py_gitea_opensuse_org import MergePullRequestOption
 from py_gitea_opensuse_org.api.repository_api import RepositoryApi
 from py_gitea_opensuse_org.models.pull_request import PullRequest
 
+
 from scm_staging.ci_status import set_commit_status_from_obs
-from scm_staging.webhook import AppConfig
+from scm_staging.db import (
+    PullRequestToSubmitRequest,
+    create_db,
+    find_submitrequests,
+    remove_submit_request,
+)
+from scm_staging.logger import LOGGER
+from scm_staging.webhook import DEFAULT_DB_NAME, AppConfig
 
 
 _PREFIX = "opensuse.obs"
@@ -49,6 +61,33 @@ class PackageBuildUnchangedPayload(PackageBuildSuccessPayload):
     pass
 
 
+class ActionPayload(TypedDict):
+    action_id: int
+    type: str
+    sourceproject: str
+    sourcepackage: str
+    sourcerevision: str
+    targetproject: str
+    targetpackage: str
+    makeoriginolder: NotRequired[bool]
+    sourceupdate: NotRequired[str]
+
+
+class RequestStateChangedPayload(TypedDict):
+    author: str
+    comment: str
+    description: str
+    id: int
+    number: int
+    actions: list[ActionPayload]
+    state: str
+    when: str
+    who: str
+    oldstate: str
+    namespace: str
+    duration: int
+
+
 async def pr_from_pkg_name(
     payload: PackageBuildSuccessPayload
     | PackageBuildFailurePayload
@@ -73,10 +112,21 @@ async def pr_from_pkg_name(
     )
 
 
-import pika
+async def merge_pr(pr: PullRequestToSubmitRequest, api_client: ApiClient) -> None:
+    repo_api = RepositoryApi(api_client)
+    await repo_api.repo_merge_pull_request(
+        owner=pr.gitea_repo_owner,
+        repo=pr.gitea_repo_name,
+        index=pr.pull_request_number,
+        body=MergePullRequestOption(Do="merge"),
+    )
 
 
-def main() -> None:
+#: routing key of the message that a request change its state
+_SR_ACK_ROUTING_KEY = f"{_PREFIX}.request.state_change"
+
+
+def rabbit_listener(db_file: str) -> None:
     loop = asyncio.get_event_loop()
     app_config = AppConfig.from_env()
 
@@ -90,26 +140,61 @@ def main() -> None:
             f"{_PREFIX}.package.build_success",
             f"{_PREFIX}.package.build_fail",
             f"{_PREFIX}.package.build_unchanged",
+            _SR_ACK_ROUTING_KEY,
         ):
+            return
+
+        if method.routing_key == _SR_ACK_ROUTING_KEY:
+            try:
+                rq_payload: RequestStateChangedPayload = json.loads(body.decode())
+                if rq_payload["state"] == "accepted" and (
+                    prs := find_submitrequests(db_file, sr_id=rq_payload["number"])
+                ):
+                    assert len(prs) == 1
+                    if prs[0].merge_pr:
+                        loop.run_until_complete(
+                            merge_pr(prs[0], app_config._api_client)
+                        )
+                    remove_submit_request(db_file, prs[0].submit_request_id)
+
+            except Exception as exc:
+                LOGGER.debug(
+                    "Failed to process message with the body '%s', got the exception '%s'",
+                    body.decode(),
+                    exc,
+                )
+                pass
             return
 
         try:
             payload: PackageBuildSuccessPayload | PackageBuildFailurePayload = (
                 json.loads(body.decode())
             )
-            pr = loop.run_until_complete(
-                pr_from_pkg_name(
-                    payload, app_config.osc.username, app_config._api_client
-                )
+            prs = find_submitrequests(
+                db_file,
+                obs_project_name=payload["project"],
+                obs_package_name=payload["package"],
             )
-            if pr:
+            if len(prs) == 1:
+                LOGGER.debug(
+                    "package %s got built in %s", payload["package"], payload["project"]
+                )
+                repo_api = RepositoryApi(app_config._api_client)
+                # get the pr for the commit sha
+                pr = loop.run_until_complete(
+                    repo_api.repo_get_pull_request(
+                        owner=prs[0].gitea_repo_owner,
+                        repo=prs[0].gitea_repo_name,
+                        index=prs[0].pull_request_number,
+                    )
+                )
                 loop.run_until_complete(
                     set_commit_status_from_obs(
                         app_config.osc,
                         app_config._api_client,
-                        commit_sha=(head := pr.head).sha,
-                        repo_name=(repo := head.repo).name,
-                        repo_owner=repo.owner.login,
+                        commit_sha=pr.head.sha,
+                        repo_name=prs[0].gitea_repo_name,
+                        repo_owner=prs[0].gitea_repo_owner,
                         pkg_name=payload["package"],
                         project_name=payload["project"],
                     )
@@ -156,3 +241,21 @@ def main() -> None:
         except pika.exceptions.AMQPConnectionError:
             print("Connection was closed, retrying...")
             continue
+
+
+def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--db-file",
+        nargs=1,
+        default=[DEFAULT_DB_NAME],
+        help="SQLite3 database tracking the submitrequests",
+    )
+
+    args = parser.parse_args()
+    db_file = args.db_file[0]
+
+    create_db(db_file)
+    rabbit_listener(db_file)

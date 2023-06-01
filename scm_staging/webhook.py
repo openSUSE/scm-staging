@@ -5,7 +5,7 @@ for gitea events.
 
 import asyncio
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum, unique
 import os
 from aiohttp import ClientResponseError
@@ -31,6 +31,12 @@ from tornado.web import Application
 
 from scm_staging.ci_status import set_commit_status_from_obs
 from scm_staging.logger import LOGGER
+from scm_staging.db import (
+    PullRequestToSubmitRequest,
+    create_db,
+    insert_submit_request,
+    remove_submit_request,
+)
 
 
 class User(BaseModel):
@@ -119,15 +125,19 @@ class PullRequestPayload(BaseModel):
     review: Review | None
 
 
+DEFAULT_DB_NAME = "submit_requests.db"
+
+
 @dataclass(frozen=True)
 class AppConfig:
     gitea_user: str
     branch_name: str
     osc: Osc
     destination_project: str
+    db_file_name: str = DEFAULT_DB_NAME
 
-    _conf: Configuration
-    _api_client: ApiClient
+    _conf: Configuration = field(default_factory=Configuration)
+    _api_client: ApiClient = field(default_factory=lambda: ApiClient(Configuration()))
 
     @staticmethod
     def from_env() -> "AppConfig":
@@ -148,6 +158,7 @@ class AppConfig:
             destination_project=os.getenv(
                 "DESTINATION_PROJECT", "devel:Factory:git-workflow:mold:core"
             ),
+            db_file_name=os.getenv("DB_FILE_NAME", DEFAULT_DB_NAME),
             _conf=conf,
             _api_client=ApiClient(conf),
         )
@@ -286,6 +297,7 @@ class MainHandler(tornado.web.RequestHandler):
                             comment=f"pull request #{payload.pull_request.number} has been closed",
                         )
                     )
+                    remove_submit_request(self.app_config.db_file_name, req.id)
 
             await asyncio.gather(*tasks)
             try:
@@ -333,6 +345,21 @@ class MainHandler(tornado.web.RequestHandler):
             pkg_name=pkg.name,
             dest_prj=self.app_config.destination_project,
             supersede_old_request=True,
+        )
+
+        create_db(self.app_config.db_file_name)
+
+        insert_submit_request(
+            self.app_config.db_file_name,
+            PullRequestToSubmitRequest(
+                submit_request_id=new_req.id,
+                obs_package_name=pkg.name,
+                obs_project_name=prj.name,
+                gitea_repo_owner=base.repo.owner.login,
+                gitea_repo_name=base.repo.name,
+                pull_request_number=payload.pull_request.number,
+                merge_pr=matching_branch_conf.merge_pr,
+            ),
         )
 
         # comment on the PR with a link to the SR
