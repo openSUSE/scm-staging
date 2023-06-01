@@ -145,7 +145,3 @@ def main() -> None:
         except pika.exceptions.AMQPConnectionError:
             print("Connection was closed, retrying...")
             continue
-
-
-if __name__ == "__main__":
-    main()
