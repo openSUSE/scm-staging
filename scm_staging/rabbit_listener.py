@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import asyncio
 import json
 from typing import TypedDict
@@ -61,7 +63,7 @@ async def pr_from_pkg_name(
     | PackageBuildFailurePayload
     | PackageBuildUnchangedPayload,
 ) -> PullRequest | None:
-    if not f"home:{_app_config.osc.username}:SCM_STAGING:Factory" in payload["project"]:
+    if not f"home:{_app_config.bot_user}:SCM_STAGING:Factory" in payload["project"]:
         return None
 
     repo_api = RepositoryApi(_app_config._api_client)
@@ -82,49 +84,68 @@ import pika
 
 
 def main() -> None:
-    loop = asyncio.get_event_loop()
-    connection = pika.BlockingConnection(
-        pika.URLParameters("amqps://opensuse:opensuse@rabbit.opensuse.org")
-    )
-    channel = connection.channel()
-
-    channel.exchange_declare(
-        exchange="pubsub", exchange_type=ExchangeType.topic, passive=True, durable=True
-    )
-
-    result = channel.queue_declare("", exclusive=True)
-    queue_name = result.method.queue
-    assert queue_name
-
-    channel.queue_bind(exchange="pubsub", queue=queue_name, routing_key="#")
-
-    def callback(
-        ch: BlockingChannel,
-        method: Basic.Deliver,
-        properties: pika.BasicProperties,
-        body: bytes,
-    ):
-        if (method.routing_key or "") not in (
-            f"{_PREFIX}.package.build_success",
-            f"{_PREFIX}.package.build_fail",
-            f"{_PREFIX}.package.build_unchanged",
-        ):
-            return
-
+    while(True):
         try:
-            payload: PackageBuildSuccessPayload | PackageBuildFailurePayload = (
-                json.loads(body.decode())
+            loop = asyncio.get_event_loop()
+            connection = pika.BlockingConnection(
+                pika.URLParameters("amqps://opensuse:opensuse@rabbit.opensuse.org")
             )
-            pr = loop.run_until_complete(pr_from_pkg_name(payload))
-            if pr:
-                loop.run_until_complete(
-                    update_commit_status(
-                        pr, pkg_name=payload["package"], prj_name=payload["project"]
+            channel = connection.channel()
+
+            channel.exchange_declare(
+                exchange="pubsub", exchange_type=ExchangeType.topic, passive=True, durable=True
+            )
+
+            result = channel.queue_declare("", exclusive=True)
+            queue_name = result.method.queue
+            assert queue_name
+
+            channel.queue_bind(exchange="pubsub", queue=queue_name, routing_key="#")
+
+            def callback(
+                ch: BlockingChannel, method: Basic.Deliver, properties: pika.BasicProperties, body: bytes
+            ):
+                if (method.routing_key or "") not in (
+                    f"{_PREFIX}.package.build_success",
+                    f"{_PREFIX}.package.build_fail",
+                    f"{_PREFIX}.package.build_unchanged",
+                ):
+                    return
+
+                try:
+                    payload: PackageBuildSuccessPayload | PackageBuildFailurePayload = (
+                        json.loads(body.decode())
                     )
-                )
-        except Exception:
-            pass
+                    pr = loop.run_until_complete(pr_from_pkg_name(payload))
+                    if pr:
+                        loop.run_until_complete(
+                            update_commit_status(
+                                pr, pkg_name=payload["package"], prj_name=payload["project"]
+                            )
+                        )
+                except Exception:
+                    pass
 
-    channel.basic_consume(queue_name, callback, auto_ack=True)
+            channel.basic_consume(queue_name, callback, auto_ack=True)
 
-    channel.start_consuming()
+            channel.start_consuming()
+
+        except pika.exceptions.ConnectionClosedByBroker:
+            # Uncomment this to make the example not attempt recovery
+            # from server-initiated connection closure, including
+            # when the node is stopped cleanly
+            #
+            # break
+            continue
+        # Do not recover on channel errors
+        except pika.exceptions.AMQPChannelError as err:
+            print("Caught a channel error: {}, stopping...".format(err))
+            break
+        # Recover on all other connection errors
+        except pika.exceptions.AMQPConnectionError:
+            print("Connection was closed, retrying...")
+            continue
+
+
+if __name__ == "__main__":
+    main()
