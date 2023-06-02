@@ -22,6 +22,7 @@ pydantic = "^1.10"
 submit_to_pool = "scm_staging.submit_to_pool:main"
 rabbit_listener = "scm_staging.rabbit_listener:main"
 app = "scm_staging.webhook:main"
+ci_status = "scm_staging.ci_status:main"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=22.10"

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """This module contains helper functions to set the commit status (= CI status)
 on gitea based on the package build on OBS.
 
@@ -102,7 +101,7 @@ async def fetch_hash_of_head_of_branch(
     return branch.commit.id
 
 
-if __name__ == "__main__":
+def main() -> None:
     import asyncio
     from argparse import ArgumentParser
     from scm_staging.webhook import AppConfig
