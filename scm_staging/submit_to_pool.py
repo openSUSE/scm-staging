@@ -1,3 +1,8 @@
+"""This module has a helper function to automatically create a pull request from
+``gitea.opensuse.org/rpm/$pkg`` to ``gitea.opensuse.org/pool/$pkg``.
+
+"""
+
 import asyncio
 import tempfile
 from git.remote import Remote

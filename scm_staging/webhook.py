@@ -1,3 +1,8 @@
+"""This module contains the tornado web-application with the webhook listening
+for gitea events.
+
+"""
+
 import asyncio
 import json
 from dataclasses import dataclass

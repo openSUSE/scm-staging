@@ -1,3 +1,8 @@
+"""This module holds the functions listening to the rabbitmq bus of OBS for
+package build results and updating the commit status.
+
+"""
+
 import asyncio
 import json
 from typing import TypedDict
@@ -5,6 +10,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.exchange_type import ExchangeType
 from pika.spec import Basic
 import pika.exceptions
+from py_gitea_opensuse_org import ApiClient
 
 from py_gitea_opensuse_org.api.repository_api import RepositoryApi
 from py_gitea_opensuse_org.models.pull_request import PullRequest
@@ -14,8 +20,6 @@ from scm_staging.webhook import AppConfig
 
 
 _PREFIX = "opensuse.obs"
-
-_app_config = AppConfig.from_env()
 
 
 class PackageBuildSuccessPayload(TypedDict):
@@ -45,27 +49,17 @@ class PackageBuildUnchangedPayload(PackageBuildSuccessPayload):
     pass
 
 
-async def update_commit_status(pr: PullRequest, pkg_name: str, prj_name: str) -> None:
-    await set_commit_status_from_obs(
-        _app_config.osc,
-        _app_config._api_client,
-        commit_sha=(head := pr.head).sha,
-        repo_name=(repo := head.repo).name,
-        repo_owner=repo.owner.login,
-        pkg_name=pkg_name,
-        project_name=prj_name,
-    )
-
-
 async def pr_from_pkg_name(
     payload: PackageBuildSuccessPayload
     | PackageBuildFailurePayload
     | PackageBuildUnchangedPayload,
+    osc_username: str,
+    api_client: ApiClient,
 ) -> PullRequest | None:
-    if not f"home:{_app_config.osc.username}:SCM_STAGING:Factory" in payload["project"]:
+    if not f"home:{osc_username}:SCM_STAGING:Factory" in payload["project"]:
         return None
 
-    repo_api = RepositoryApi(_app_config._api_client)
+    repo_api = RepositoryApi(api_client)
 
     repo_name, pr_num = payload["project"].split(":")[-2:]
     if repo_name != payload["package"]:
@@ -84,6 +78,7 @@ import pika
 
 def main() -> None:
     loop = asyncio.get_event_loop()
+    app_config = AppConfig.from_env()
 
     def callback(
         ch: BlockingChannel,
@@ -102,11 +97,21 @@ def main() -> None:
             payload: PackageBuildSuccessPayload | PackageBuildFailurePayload = (
                 json.loads(body.decode())
             )
-            pr = loop.run_until_complete(pr_from_pkg_name(payload))
+            pr = loop.run_until_complete(
+                pr_from_pkg_name(
+                    payload, app_config.osc.username, app_config._api_client
+                )
+            )
             if pr:
                 loop.run_until_complete(
-                    update_commit_status(
-                        pr, pkg_name=payload["package"], prj_name=payload["project"]
+                    set_commit_status_from_obs(
+                        app_config.osc,
+                        app_config._api_client,
+                        commit_sha=(head := pr.head).sha,
+                        repo_name=(repo := head.repo).name,
+                        repo_owner=repo.owner.login,
+                        pkg_name=payload["package"],
+                        project_name=payload["project"],
                     )
                 )
         except Exception:
