@@ -11,6 +11,7 @@ from py_gitea_opensuse_org import (
     RepositoryApi,
 )
 from git.repo import Repo
+from py_gitea_opensuse_org.exceptions import ApiException
 
 from scm_staging.webhook import AppConfig
 
@@ -18,7 +19,13 @@ from scm_staging.webhook import AppConfig
 async def create_pr_to_pool(
     pkg_name: str, gitea_user: str, repo_api: RepositoryApi
 ) -> None:
-    await repo_api.create_fork(owner="pool", repo=pkg_name)
+    try:
+        await repo_api.create_fork(owner="pool", repo=pkg_name)
+    except ApiException:
+        # If the repo has already been forked, then reading it would succeed => continue
+        # If another error occurred and the repo doesn't exist => this will fail
+        # as well and abort
+        await repo_api.repo_get(owner="pool", repo=pkg_name)
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         repo = Repo.clone_from(

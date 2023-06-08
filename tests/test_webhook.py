@@ -24,9 +24,6 @@ class WebhookSmokeTest(TestWebhook):
     def test_with_recorded_payload(
         self,
     ) -> None:
-        for event, json in PR_EVENTS.items():
-            print(event)
+        for _, json in PR_EVENTS.items():
             res = self.fetch("/hook", method="POST", body=json, raise_error=True)
             assert res
-
-        # self.fetch("/", raise_error=True)

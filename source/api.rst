@@ -9,6 +9,14 @@ API Documentation
    :undoc-members:
 
 
+:py:mod:`~scm_staging.db` module
+--------------------------------
+
+.. automodule:: scm_staging.db
+   :members:
+   :undoc-members:
+
+
 :py:mod:`~scm_staging.rabbit_listener` module
 ---------------------------------------------
 
