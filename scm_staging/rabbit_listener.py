@@ -203,6 +203,8 @@ def rabbit_listener(db_file: str) -> None:
             pass
 
     while True:
+        connection: pika.BlockingConnection | None = None
+        channel: BlockingChannel | None = None
         try:
             connection = pika.BlockingConnection(
                 pika.URLParameters("amqps://opensuse:opensuse@rabbit.opensuse.org")
@@ -227,20 +229,26 @@ def rabbit_listener(db_file: str) -> None:
             channel.start_consuming()
 
         except pika.exceptions.ConnectionClosedByBroker:
-            # Uncomment this to make the example not attempt recovery
-            # from server-initiated connection closure, including
-            # when the node is stopped cleanly
-            #
-            # break
+            LOGGER.debug("Broker closed connection, retrying")
             continue
-        # Do not recover on channel errors
+
         except pika.exceptions.AMQPChannelError as err:
-            print("Caught a channel error: {}, stopping...".format(err))
+            # Do not recover on channel errors
+            LOGGER.error("Caught a channel error: %s, stopping!", err)
             break
-        # Recover on all other connection errors
-        except pika.exceptions.AMQPConnectionError:
-            print("Connection was closed, retrying...")
+
+        except pika.exceptions.AMQPConnectionError as err:
+            # Recover on all other connection errors
+            LOGGER.debug("Connection was closed: %s, retrying", err)
             continue
+
+        finally:
+            if channel:
+                channel.close()
+                channel = None
+            if connection:
+                connection.close()
+                connection = None
 
 
 def main() -> None:
