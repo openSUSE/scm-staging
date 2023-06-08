@@ -30,6 +30,7 @@ from py_obs import project
 from tornado.web import Application
 
 from scm_staging.ci_status import set_commit_status_from_obs
+from scm_staging.config import BranchConfig, SubmissionStyle, load_config
 from scm_staging.logger import LOGGER
 from scm_staging.db import (
     PullRequestToSubmitRequest,
@@ -131,9 +132,8 @@ DEFAULT_DB_NAME = "submit_requests.db"
 @dataclass(frozen=True)
 class AppConfig:
     gitea_user: str
-    branch_name: str
+    branch_config: list[BranchConfig]
     osc: Osc
-    destination_project: str
     db_file_name: str = DEFAULT_DB_NAME
 
     _conf: Configuration = field(default_factory=Configuration)
@@ -154,10 +154,7 @@ class AppConfig:
         return AppConfig(
             osc=(osc := Osc.from_env()),
             gitea_user=os.getenv("BOT_USER", osc.username),
-            branch_name=os.getenv("BRANCH_NAME", "factory"),
-            destination_project=os.getenv(
-                "DESTINATION_PROJECT", "devel:Factory:git-workflow:mold:core"
-            ),
+            branch_config=load_config(os.getenv("BRANCH_CONFIG", "config.json")),
             db_file_name=os.getenv("DB_FILE_NAME", DEFAULT_DB_NAME),
             _conf=conf,
             _api_client=ApiClient(conf),
@@ -180,6 +177,7 @@ class MainHandler(tornado.web.RequestHandler):
         self.app_config = app_config
 
     def project_from_pull_request(self, payload: PullRequestPayload) -> project.Project:
+        pr = payload.pull_request
         return project.Project(
             name=f"home:{self.app_config.osc.username}:SCM_STAGING:{payload.repository.name}:{pr.number}",
             title=StrElementField(f"Project for Pull Request {pr.number}"),
@@ -247,6 +245,29 @@ class MainHandler(tornado.web.RequestHandler):
 
         return False
 
+    async def find_devel_project(
+        self, project_name: str, package_name: str
+    ) -> str | None:
+        """Retrieve the develproject of the package with the supplied
+        ``package_name`` from the project ``project_name``.
+
+        Returns:
+            - the develproject name or None if there is none or some error
+              occurred
+
+        """
+        try:
+            pkg = await project.fetch_meta(
+                self.app_config.osc, prj=project_name, pkg=package_name
+            )
+            if pkg.devel:
+                return pkg.devel.project
+        except Exception as exc:
+            LOGGER.error(
+                "Failed to retrieve the devel project of %s, got %s", package_name, exc
+            )
+        return None
+
     async def post(self) -> None:
         if not self.request.body:
             return
@@ -258,11 +279,26 @@ class MainHandler(tornado.web.RequestHandler):
 
         LOGGER.debug(payload)
 
-        if (
-            (base := payload.pull_request.base).ref != self.app_config.branch_name
-            and base.label != self.app_config.branch_name
-        ):
-            LOGGER.debug("wrong branch name %s", base.ref)
+        matching_branch_conf: BranchConfig | None = None
+
+        base = payload.pull_request.base
+        for conf in self.app_config.branch_config:
+            if (
+                base.ref == conf.target_branch_name
+                or base.label == conf.target_branch_name
+            ) and payload.repository.owner.login == conf.organization:
+                LOGGER.debug(
+                    "Matched config %s for PR: %s", conf, payload.pull_request.url
+                )
+                matching_branch_conf = conf
+                break
+
+        if matching_branch_conf is None:
+            LOGGER.debug(
+                "wrong branch name %s or wrong organization %s",
+                base.ref,
+                payload.repository.owner.login,
+            )
             return
 
         pkg = package_from_pull_request(payload)
@@ -325,26 +361,51 @@ class MainHandler(tornado.web.RequestHandler):
         )
 
         # don't create SRs for not approved PRs
-        if not await self.check_if_pr_approved(
-            self.app_config._api_client,
-            owner=owner,
-            repo_name=repo_name,
-            pr_number=pr_num,
-            pkg_name=pkg.name,
-        ):
-            return
+        if matching_branch_conf.require_approval:
+            if not await self.check_if_pr_approved(
+                self.app_config._api_client,
+                owner=owner,
+                repo_name=repo_name,
+                pr_number=pr_num,
+                pkg_name=pkg.name,
+            ):
+                LOGGER.debug("PR has not been approved, approval required")
+                return
+            else:
+                LOGGER.debug("PR is approved, proceeding")
 
-        LOGGER.debug("PR has been approved, creating package")
         await project.send_meta(osc, prj=prj)
         await project.send_meta(osc, prj=prj, pkg=pkg)
 
-        new_req = await request.submit_package(
-            osc=osc,
-            source_prj=prj.name,
-            pkg_name=pkg.name,
-            dest_prj=self.app_config.destination_project,
-            supersede_old_request=True,
-        )
+        sr_kwargs = {
+            "osc": osc,
+            "source_prj": prj.name,
+            "pkg_name": pkg.name,
+            "supersede_old_request": True,
+            "description": f"🤖: Submission of {pkg.name} via {payload.pull_request.url}",
+        }
+
+        if (
+            sr_style := matching_branch_conf.submission_style
+        ) == SubmissionStyle.DIRECT:
+            sr_kwargs["dest_prj"] = matching_branch_conf.destination_project
+
+        elif sr_style == SubmissionStyle.FACTORY_DEVEL:
+            devel_prj = await self.find_devel_project(
+                matching_branch_conf.destination_project, pkg.name
+            )
+            if not devel_prj:
+                raise ValueError(
+                    f"Could not find the develproject for {pkg.name} in {matching_branch_conf.destination_project}"
+                )
+
+            sr_kwargs["dest_prj"] = await request.submit_package(
+                dest_prj=devel_prj, **sr_kwargs
+            )
+        else:
+            assert False, f"Invalid submission style {sr_style}"
+
+        new_req = await request.submit_package(**sr_kwargs)
 
         create_db(self.app_config.db_file_name)
 
@@ -383,5 +444,7 @@ def main():
     app.listen(8000)
     shutdown_event = asyncio.Event()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(shutdown_event.wait())
-    loop.run_until_complete(app_config.osc.teardown())
+    try:
+        loop.run_until_complete(shutdown_event.wait())
+    finally:
+        loop.run_until_complete(app_config.osc.teardown())

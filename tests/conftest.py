@@ -4,6 +4,7 @@ from tornado.web import Application
 
 
 from py_obs.osc import Osc
+from scm_staging.config import BranchConfig
 
 from scm_staging.webhook import AppConfig, make_app
 
@@ -19,9 +20,14 @@ class TestWebhook(AsyncHTTPTestCase):
         return make_app(
             AppConfig(
                 gitea_user="foobar",
-                branch_name="factory",
+                branch_config=[
+                    BranchConfig(
+                        target_branch_name="factory",
+                        organization="rpm",
+                        destination_project="don:t:matter",
+                    )
+                ],
                 osc=local,
-                destination_project="don:t:matter",
                 _conf=None,
                 _api_client=None,
             )
