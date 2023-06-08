@@ -167,8 +167,11 @@ class AppConfig:
 def package_from_pull_request(payload: PullRequestPayload) -> project.Package:
     return project.Package(
         name=payload.repository.name,
-        title=f"The {payload.repository.name} package",
-        scmsync=f"{payload.pull_request.head.repo.clone_url}#{payload.pull_request.head.sha}",
+        title=StrElementField(f"The {payload.repository.name} package"),
+        url=StrElementField(payload.pull_request.url),
+        scmsync=StrElementField(
+            f"{payload.pull_request.head.repo.clone_url}#{payload.pull_request.head.sha}"
+        ),
     )
 
 
@@ -178,13 +181,9 @@ class MainHandler(tornado.web.RequestHandler):
 
     def project_from_pull_request(self, payload: PullRequestPayload) -> project.Project:
         return project.Project(
-            name=f"home:{self.app_config.osc.username}:SCM_STAGING:Factory:{payload.repository.name}:{payload.pull_request.number}",
-            title=StrElementField(
-                f"Project for Pull Request {payload.pull_request.number}"
-            ),
-            description=StrElementField(
-                f"Project for Pull Request {payload.pull_request.url}"
-            ),
+            name=f"home:{self.app_config.osc.username}:SCM_STAGING:{payload.repository.name}:{pr.number}",
+            title=StrElementField(f"Project for Pull Request {pr.number}"),
+            description=StrElementField(f"Project for Pull Request {pr.url}"),
             person=[
                 project.Person(
                     userid=self.app_config.osc.username,
