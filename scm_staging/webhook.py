@@ -12,6 +12,7 @@ from aiohttp import ClientResponseError
 
 from pydantic import BaseModel, ValidationError
 import tornado
+from tornado.options import define, options
 
 from py_gitea_opensuse_org import (
     Configuration,
@@ -438,10 +439,36 @@ def make_app(app_config: AppConfig) -> Application:
     return Application([(r"/hook", MainHandler, {"app_config": app_config})])
 
 
+"""
+Tornado options and define from command line e.g. --port 8000 
+"""
+define("port", default=8000, help="Tornado web service port listen on")
+define("log", default=None, help="Filename for scm_staging log, default to console")
+define(
+    "access_log",
+    default=None,
+    help="Filename for Tornado access log, default to console",
+)
+define(
+    "app_log",
+    default=None,
+    help="Filename for Tornado application log, default to console",
+)
+define(
+    "general_log",
+    default=None,
+    help="Filename for Tornado general log, default to console",
+)
+
+
 def main():
+    options.parse_command_line()
+    LOGGER.make_logger(
+        options.log, options.access_log, options.app_log, options.general_log
+    )
     app_config = AppConfig.from_env()
     app = make_app(app_config)
-    app.listen(8000)
+    app.listen(options.port)
     shutdown_event = asyncio.Event()
     loop = asyncio.get_event_loop()
     try:
