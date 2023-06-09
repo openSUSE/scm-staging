@@ -265,5 +265,6 @@ def main() -> None:
     args = parser.parse_args()
     db_file = args.db_file[0]
 
+    LOGGER.configure_log_files()
     create_db(db_file)
     rabbit_listener(db_file)
