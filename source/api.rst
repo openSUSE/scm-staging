@@ -33,6 +33,14 @@ API Documentation
    :undoc-members:
 
 
+:py:mod:`~scm_staging.config` module
+------------------------------------
+
+.. automodule:: scm_staging.config
+   :members:
+   :undoc-members:
+
+
 :py:mod:`~scm_staging.submit_to_pool` module
 --------------------------------------------
 
