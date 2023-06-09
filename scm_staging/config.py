@@ -1,3 +1,8 @@
+"""The config module contains the Models that are loaded from the webhook json
+config file.
+
+"""
+
 from enum import StrEnum, auto, unique
 import json
 from pydantic import BaseModel
@@ -27,18 +32,19 @@ class BranchConfig(BaseModel):
     #: organization (= username) for which pull requests will be monitored
     organization: str
 
-    #: whether merge requests have to be approved by the package maintainer
-    #: first, before a submitrequest is created
+    #: Whether merge requests have to be approved by the package maintainer
+    #: first, before a submitrequest is created. The default is ``False``.
     require_approval: bool = False
 
     #: project name on OBS against which the package should be submitted
     destination_project: str
 
-    #: defines how the bot should submit the packages
+    #: Defines how the bot should submit the packages, defaults to a direct
+    #: submission (:py:attr:`SubmissionStyle.DIRECT`)
     submission_style: SubmissionStyle = SubmissionStyle.DIRECT
 
-    #: whether the bot shall merge the pull request once the submitrequest is
-    #: accepted
+    #: Whether the bot shall merge the pull request once the submitrequest is
+    #: accepted. Defaults to ``True``.
     merge_pr: bool = True
 
 
