@@ -440,7 +440,7 @@ def make_app(app_config: AppConfig) -> Application:
 
 
 """
-Tornado options and define from command line e.g. --port 8000 
+Tornado options and define from command line e.g. --port 8000
 """
 define("port", default=8000, help="Tornado web service port listen on")
 define("log", default=None, help="Filename for scm_staging log, default to console")
@@ -463,7 +463,7 @@ define(
 
 def main():
     options.parse_command_line()
-    LOGGER.make_logger(
+    LOGGER.configure_log_files(
         options.log, options.access_log, options.app_log, options.general_log
     )
     app_config = AppConfig.from_env()
