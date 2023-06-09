@@ -52,6 +52,7 @@ jobs:
         with:
           name: build
           path: ./build/
+          if-no-files-found: error
 
   deploy:
     name: deploy to the gh-pages branch
