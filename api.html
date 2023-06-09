@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API Documentation &#8212; scm-staging  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Git workflow setup" href="setup.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="api-documentation">
+<h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this heading">¶</a></h1>
+<section id="module-scm_staging.webhook">
+<span id="webhook-module"></span><h2><a class="reference internal" href="#module-scm_staging.webhook" title="scm_staging.webhook"><code class="xref py py-mod docutils literal notranslate"><span class="pre">webhook</span></code></a> module<a class="headerlink" href="#module-scm_staging.webhook" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the tornado web-application with the webhook listening
+for gitea events.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.AppConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">AppConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">gitea_user:</span> <span class="pre">str,</span> <span class="pre">branch_config:</span> <span class="pre">list[scm_staging.config.BranchConfig],</span> <span class="pre">osc:</span> <span class="pre">py_obs.osc.Osc,</span> <span class="pre">db_file_name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'submit_requests.db',</span> <span class="pre">_conf:</span> <span class="pre">py_gitea_opensuse_org.configuration.Configuration</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">_api_client:</span> <span class="pre">py_gitea_opensuse_org.api_client.ApiClient</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.AppConfig" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.AppConfig.branch_config">
+<span class="sig-name descname"><span class="pre">branch_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scm_staging.config.BranchConfig" title="scm_staging.config.BranchConfig"><span class="pre">scm_staging.config.BranchConfig</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scm_staging.webhook.AppConfig.branch_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.AppConfig.db_file_name">
+<span class="sig-name descname"><span class="pre">db_file_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'submit_requests.db'</span></em><a class="headerlink" href="#scm_staging.webhook.AppConfig.db_file_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scm_staging.webhook.AppConfig.from_env">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_env</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#scm_staging.webhook.AppConfig" title="scm_staging.webhook.AppConfig"><span class="pre">AppConfig</span></a></span></span><a class="headerlink" href="#scm_staging.webhook.AppConfig.from_env" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.AppConfig.gitea_user">
+<span class="sig-name descname"><span class="pre">gitea_user</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.AppConfig.gitea_user" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.AppConfig.osc">
+<span class="sig-name descname"><span class="pre">osc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Osc</span></em><a class="headerlink" href="#scm_staging.webhook.AppConfig.osc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.Label">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">Label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.Label" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Label.color">
+<span class="sig-name descname"><span class="pre">color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Label.color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Label.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Label.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Label.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.Label.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Label.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Label.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Label.url">
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Label.url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.MainHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">MainHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">application</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Application</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HTTPServerRequest</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.MainHandler" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="scm_staging.webhook.MainHandler.check_if_pr_approved">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_if_pr_approved</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ApiClient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">owner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pr_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkg_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#scm_staging.webhook.MainHandler.check_if_pr_approved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the pull request $owner/$repo_name/$pr_number has been approved
+by at least one maintainer of the package <cite>pkg_name</cite> and no changes have
+been requested.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scm_staging.webhook.MainHandler.find_devel_project">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">find_devel_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.webhook.MainHandler.find_devel_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the develproject of the package with the supplied
+<code class="docutils literal notranslate"><span class="pre">package_name</span></code> from the project <code class="docutils literal notranslate"><span class="pre">project_name</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>the develproject name or None if there is none or some error
+occurred</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scm_staging.webhook.MainHandler.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.AppConfig" title="scm_staging.webhook.AppConfig"><span class="pre">AppConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.webhook.MainHandler.initialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scm_staging.webhook.MainHandler.post">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.webhook.MainHandler.post" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scm_staging.webhook.MainHandler.project_from_pull_request">
+<span class="sig-name descname"><span class="pre">project_from_pull_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.PullRequestPayload" title="scm_staging.webhook.PullRequestPayload"><span class="pre">PullRequestPayload</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Project</span></span></span><a class="headerlink" href="#scm_staging.webhook.MainHandler.project_from_pull_request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.Milestone">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">Milestone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">open_issues</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closed_issues</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.Milestone" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Milestone.closed_issues">
+<span class="sig-name descname"><span class="pre">closed_issues</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.Milestone.closed_issues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Milestone.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Milestone.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Milestone.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.Milestone.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Milestone.open_issues">
+<span class="sig-name descname"><span class="pre">open_issues</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.Milestone.open_issues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Milestone.state">
+<span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Milestone.state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Milestone.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Milestone.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">PullRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">User</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scm_staging.webhook.Label" title="scm_staging.webhook.Label"><span class="pre">scm_staging.webhook.Label</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">milestone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.Milestone" title="scm_staging.webhook.Milestone"><span class="pre">Milestone</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assignee</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">User</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assignees</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">scm_staging.webhook.User</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_locked</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.Ref" title="scm_staging.webhook.Ref"><span class="pre">Ref</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">head</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.Ref" title="scm_staging.webhook.Ref"><span class="pre">Ref</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updated_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.PullRequest" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.assignee">
+<span class="sig-name descname"><span class="pre">assignee</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">User</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.assignee" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.assignees">
+<span class="sig-name descname"><span class="pre">assignees</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">scm_staging.webhook.User</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.assignees" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.base">
+<span class="sig-name descname"><span class="pre">base</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.Ref" title="scm_staging.webhook.Ref"><span class="pre">Ref</span></a></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.base" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.body">
+<span class="sig-name descname"><span class="pre">body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.body" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.created_at" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.head">
+<span class="sig-name descname"><span class="pre">head</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.Ref" title="scm_staging.webhook.Ref"><span class="pre">Ref</span></a></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.head" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.is_locked">
+<span class="sig-name descname"><span class="pre">is_locked</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.is_locked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scm_staging.webhook.Label" title="scm_staging.webhook.Label"><span class="pre">scm_staging.webhook.Label</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.merge_base">
+<span class="sig-name descname"><span class="pre">merge_base</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.merge_base" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.milestone">
+<span class="sig-name descname"><span class="pre">milestone</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.Milestone" title="scm_staging.webhook.Milestone"><span class="pre">Milestone</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.milestone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.number">
+<span class="sig-name descname"><span class="pre">number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.state">
+<span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.url">
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequest.user">
+<span class="sig-name descname"><span class="pre">user</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">User</span></a></em><a class="headerlink" href="#scm_staging.webhook.PullRequest.user" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestPayload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">PullRequestPayload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pull_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.PullRequest" title="scm_staging.webhook.PullRequest"><span class="pre">PullRequest</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sender</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">User</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.Repository" title="scm_staging.webhook.Repository"><span class="pre">Repository</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">review</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.Review" title="scm_staging.webhook.Review"><span class="pre">Review</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.PullRequestPayload" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestPayload.action">
+<span class="sig-name descname"><span class="pre">action</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequestPayload.action" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestPayload.number">
+<span class="sig-name descname"><span class="pre">number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequestPayload.number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestPayload.pull_request">
+<span class="sig-name descname"><span class="pre">pull_request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.PullRequest" title="scm_staging.webhook.PullRequest"><span class="pre">PullRequest</span></a></em><a class="headerlink" href="#scm_staging.webhook.PullRequestPayload.pull_request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestPayload.repository">
+<span class="sig-name descname"><span class="pre">repository</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.Repository" title="scm_staging.webhook.Repository"><span class="pre">Repository</span></a></em><a class="headerlink" href="#scm_staging.webhook.PullRequestPayload.repository" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestPayload.review">
+<span class="sig-name descname"><span class="pre">review</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.Review" title="scm_staging.webhook.Review"><span class="pre">Review</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequestPayload.review" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestPayload.sender">
+<span class="sig-name descname"><span class="pre">sender</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">User</span></a></em><a class="headerlink" href="#scm_staging.webhook.PullRequestPayload.sender" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestReviewType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">PullRequestReviewType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.PullRequestReviewType" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestReviewType.APPROVED">
+<span class="sig-name descname"><span class="pre">APPROVED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pull_request_review_approved'</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequestReviewType.APPROVED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestReviewType.COMMENT">
+<span class="sig-name descname"><span class="pre">COMMENT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pull_request_comment'</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequestReviewType.COMMENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.PullRequestReviewType.REJECTED">
+<span class="sig-name descname"><span class="pre">REJECTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pull_request_review_rejected'</span></em><a class="headerlink" href="#scm_staging.webhook.PullRequestReviewType.REJECTED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.Ref">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">Ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.Repository" title="scm_staging.webhook.Repository"><span class="pre">Repository</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.Ref" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Ref.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Ref.label" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Ref.ref">
+<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Ref.ref" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Ref.repo">
+<span class="sig-name descname"><span class="pre">repo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.Repository" title="scm_staging.webhook.Repository"><span class="pre">Repository</span></a></em><a class="headerlink" href="#scm_staging.webhook.Ref.repo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Ref.repo_id">
+<span class="sig-name descname"><span class="pre">repo_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.Ref.repo_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Ref.sha">
+<span class="sig-name descname"><span class="pre">sha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Ref.sha" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">Repository</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">owner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">User</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssh_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clone_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.Repository" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository.clone_url">
+<span class="sig-name descname"><span class="pre">clone_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Repository.clone_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Repository.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository.full_name">
+<span class="sig-name descname"><span class="pre">full_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Repository.full_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository.html_url">
+<span class="sig-name descname"><span class="pre">html_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Repository.html_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.Repository.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Repository.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository.owner">
+<span class="sig-name descname"><span class="pre">owner</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.User" title="scm_staging.webhook.User"><span class="pre">User</span></a></em><a class="headerlink" href="#scm_staging.webhook.Repository.owner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Repository.ssh_url">
+<span class="sig-name descname"><span class="pre">ssh_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Repository.ssh_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.Review">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">Review</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.PullRequestReviewType" title="scm_staging.webhook.PullRequestReviewType"><span class="pre">PullRequestReviewType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.Review" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Review.content">
+<span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Review.content" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.Review.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.webhook.PullRequestReviewType" title="scm_staging.webhook.PullRequestReviewType"><span class="pre">PullRequestReviewType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.Review.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.webhook.User">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">User</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">login</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.User" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.User.email">
+<span class="sig-name descname"><span class="pre">email</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.User.email" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.User.full_name">
+<span class="sig-name descname"><span class="pre">full_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.User.full_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.User.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.webhook.User.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.webhook.User.login">
+<span class="sig-name descname"><span class="pre">login</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.webhook.User.login" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.webhook.main">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.webhook.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.webhook.make_app">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">make_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.AppConfig" title="scm_staging.webhook.AppConfig"><span class="pre">AppConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Application</span></span></span><a class="headerlink" href="#scm_staging.webhook.make_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.webhook.package_from_pull_request">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.webhook.</span></span><span class="sig-name descname"><span class="pre">package_from_pull_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.webhook.PullRequestPayload" title="scm_staging.webhook.PullRequestPayload"><span class="pre">PullRequestPayload</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Package</span></span></span><a class="headerlink" href="#scm_staging.webhook.package_from_pull_request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-scm_staging.db">
+<span id="db-module"></span><h2><a class="reference internal" href="#module-scm_staging.db" title="scm_staging.db"><code class="xref py py-mod docutils literal notranslate"><span class="pre">db</span></code></a> module<a class="headerlink" href="#module-scm_staging.db" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the helper functions to store the created submitrequests
+and the respective pull requests on gitea in a database to keep track of them.</p>
+<p>The rabbit listener and the webhook share information via the database.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.db.PullRequestToSubmitRequest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.db.</span></span><span class="sig-name descname"><span class="pre">PullRequestToSubmitRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">submit_request_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_project_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_package_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gitea_repo_owner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gitea_repo_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pull_request_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_pr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.db.PullRequestToSubmitRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>pydantic model used to store the submit requests and their corresponding
+pull requests on gitea.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.db.PullRequestToSubmitRequest.gitea_repo_name">
+<span class="sig-name descname"><span class="pre">gitea_repo_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.db.PullRequestToSubmitRequest.gitea_repo_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the repository against which the PR has been opened</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.db.PullRequestToSubmitRequest.gitea_repo_owner">
+<span class="sig-name descname"><span class="pre">gitea_repo_owner</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.db.PullRequestToSubmitRequest.gitea_repo_owner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Owner of the repository against which the PR has been opened</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.db.PullRequestToSubmitRequest.merge_pr">
+<span class="sig-name descname"><span class="pre">merge_pr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#scm_staging.db.PullRequestToSubmitRequest.merge_pr" title="Permalink to this definition">¶</a></dt>
+<dd><p>flag whether the pull request should be merged once the submit request is
+accepted</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.db.PullRequestToSubmitRequest.obs_package_name">
+<span class="sig-name descname"><span class="pre">obs_package_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.db.PullRequestToSubmitRequest.obs_package_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>name of the package on OBS where the pull request is checked out</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.db.PullRequestToSubmitRequest.obs_project_name">
+<span class="sig-name descname"><span class="pre">obs_project_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.db.PullRequestToSubmitRequest.obs_project_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>name of the project on OBS where the package is created</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.db.PullRequestToSubmitRequest.pull_request_number">
+<span class="sig-name descname"><span class="pre">pull_request_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.db.PullRequestToSubmitRequest.pull_request_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of the pull request via which the PR can be found in the web
+UI. This is <strong>not</strong> the ID of the pull request!</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.db.PullRequestToSubmitRequest.submit_request_id">
+<span class="sig-name descname"><span class="pre">submit_request_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.db.PullRequestToSubmitRequest.submit_request_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>numeric id of the SubmitRequest on OBS</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.db.create_db">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.db.</span></span><span class="sig-name descname"><span class="pre">create_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.db.create_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes the database and creates the required table if it does not
+yet exist. If the database and/or the table already exist, then this
+function does nothing.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.db.find_submitrequests">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.db.</span></span><span class="sig-name descname"><span class="pre">find_submitrequests</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sr_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_project_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_package_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scm_staging.db.PullRequestToSubmitRequest" title="scm_staging.db.PullRequestToSubmitRequest"><span class="pre">scm_staging.db.PullRequestToSubmitRequest</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#scm_staging.db.find_submitrequests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all submitrequests from the database when no optional parameters
+are supplied. If any of the optional parameters is supplied then only
+submitrequests with that matching parameter are returned. If no
+submitrequests match, then an empty list is returned.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.db.insert_submit_request">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.db.</span></span><span class="sig-name descname"><span class="pre">insert_submit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pr_to_sr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.db.PullRequestToSubmitRequest" title="scm_staging.db.PullRequestToSubmitRequest"><span class="pre">PullRequestToSubmitRequest</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.db.insert_submit_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inserts the supplied <a class="reference internal" href="#scm_staging.db.PullRequestToSubmitRequest" title="scm_staging.db.PullRequestToSubmitRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">PullRequestToSubmitRequest</span></code></a> into the
+database.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.db.remove_submit_request">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.db.</span></span><span class="sig-name descname"><span class="pre">remove_submit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sr_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.db.remove_submit_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the submit request with the supplied id from the database.</p>
+</dd></dl>
+
+</section>
+<section id="module-scm_staging.rabbit_listener">
+<span id="rabbit-listener-module"></span><h2><a class="reference internal" href="#module-scm_staging.rabbit_listener" title="scm_staging.rabbit_listener"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rabbit_listener</span></code></a> module<a class="headerlink" href="#module-scm_staging.rabbit_listener" title="Permalink to this heading">¶</a></h2>
+<p>This module holds the functions listening to the rabbitmq bus of OBS for
+package build results and updating the commit status.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">ActionPayload</span></span><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.action_id">
+<span class="sig-name descname"><span class="pre">action_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.action_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.makeoriginolder">
+<span class="sig-name descname"><span class="pre">makeoriginolder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.makeoriginolder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.sourcepackage">
+<span class="sig-name descname"><span class="pre">sourcepackage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.sourcepackage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.sourceproject">
+<span class="sig-name descname"><span class="pre">sourceproject</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.sourceproject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.sourcerevision">
+<span class="sig-name descname"><span class="pre">sourcerevision</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.sourcerevision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.sourceupdate">
+<span class="sig-name descname"><span class="pre">sourceupdate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.sourceupdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.targetpackage">
+<span class="sig-name descname"><span class="pre">targetpackage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.targetpackage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.targetproject">
+<span class="sig-name descname"><span class="pre">targetproject</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.targetproject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.ActionPayload.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.ActionPayload.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">PackageBuildFailurePayload</span></span><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.arch">
+<span class="sig-name descname"><span class="pre">arch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.arch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.bcnt">
+<span class="sig-name descname"><span class="pre">bcnt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.bcnt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.buildtype">
+<span class="sig-name descname"><span class="pre">buildtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.buildtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.endtime">
+<span class="sig-name descname"><span class="pre">endtime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.endtime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.package">
+<span class="sig-name descname"><span class="pre">package</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.package" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.previouslyfailed">
+<span class="sig-name descname"><span class="pre">previouslyfailed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.previouslyfailed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.project">
+<span class="sig-name descname"><span class="pre">project</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.project" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.readytime">
+<span class="sig-name descname"><span class="pre">readytime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.readytime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.reason">
+<span class="sig-name descname"><span class="pre">reason</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.reason" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.release">
+<span class="sig-name descname"><span class="pre">release</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.release" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.repository">
+<span class="sig-name descname"><span class="pre">repository</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.repository" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.rev">
+<span class="sig-name descname"><span class="pre">rev</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.rev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.srcmd5">
+<span class="sig-name descname"><span class="pre">srcmd5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.srcmd5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.starttime">
+<span class="sig-name descname"><span class="pre">starttime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.starttime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.verifymd5">
+<span class="sig-name descname"><span class="pre">verifymd5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.verifymd5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.versrel">
+<span class="sig-name descname"><span class="pre">versrel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.versrel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildFailurePayload.workerid">
+<span class="sig-name descname"><span class="pre">workerid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload.workerid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">PackageBuildSuccessPayload</span></span><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.arch">
+<span class="sig-name descname"><span class="pre">arch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.arch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.bcnt">
+<span class="sig-name descname"><span class="pre">bcnt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.bcnt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.buildtype">
+<span class="sig-name descname"><span class="pre">buildtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.buildtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.endtime">
+<span class="sig-name descname"><span class="pre">endtime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.endtime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.package">
+<span class="sig-name descname"><span class="pre">package</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.package" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.project">
+<span class="sig-name descname"><span class="pre">project</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.project" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.readytime">
+<span class="sig-name descname"><span class="pre">readytime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.readytime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.reason">
+<span class="sig-name descname"><span class="pre">reason</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.reason" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.release">
+<span class="sig-name descname"><span class="pre">release</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.release" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.repository">
+<span class="sig-name descname"><span class="pre">repository</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.repository" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.rev">
+<span class="sig-name descname"><span class="pre">rev</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.rev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.srcmd5">
+<span class="sig-name descname"><span class="pre">srcmd5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.srcmd5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.starttime">
+<span class="sig-name descname"><span class="pre">starttime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.starttime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.verifymd5">
+<span class="sig-name descname"><span class="pre">verifymd5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.verifymd5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.versrel">
+<span class="sig-name descname"><span class="pre">versrel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.versrel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildSuccessPayload.workerid">
+<span class="sig-name descname"><span class="pre">workerid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload.workerid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">PackageBuildUnchangedPayload</span></span><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.arch">
+<span class="sig-name descname"><span class="pre">arch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.arch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.bcnt">
+<span class="sig-name descname"><span class="pre">bcnt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.bcnt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.buildtype">
+<span class="sig-name descname"><span class="pre">buildtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.buildtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.endtime">
+<span class="sig-name descname"><span class="pre">endtime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.endtime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.package">
+<span class="sig-name descname"><span class="pre">package</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.package" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.project">
+<span class="sig-name descname"><span class="pre">project</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.project" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.readytime">
+<span class="sig-name descname"><span class="pre">readytime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.readytime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.reason">
+<span class="sig-name descname"><span class="pre">reason</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.reason" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.release">
+<span class="sig-name descname"><span class="pre">release</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.release" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.repository">
+<span class="sig-name descname"><span class="pre">repository</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.repository" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.rev">
+<span class="sig-name descname"><span class="pre">rev</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.rev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.srcmd5">
+<span class="sig-name descname"><span class="pre">srcmd5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.srcmd5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.starttime">
+<span class="sig-name descname"><span class="pre">starttime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.starttime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.verifymd5">
+<span class="sig-name descname"><span class="pre">verifymd5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.verifymd5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.versrel">
+<span class="sig-name descname"><span class="pre">versrel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.versrel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.PackageBuildUnchangedPayload.workerid">
+<span class="sig-name descname"><span class="pre">workerid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload.workerid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">RequestStateChangedPayload</span></span><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.actions">
+<span class="sig-name descname"><span class="pre">actions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scm_staging.rabbit_listener.ActionPayload" title="scm_staging.rabbit_listener.ActionPayload"><span class="pre">scm_staging.rabbit_listener.ActionPayload</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.author">
+<span class="sig-name descname"><span class="pre">author</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.author" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.comment">
+<span class="sig-name descname"><span class="pre">comment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.comment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.duration">
+<span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.namespace">
+<span class="sig-name descname"><span class="pre">namespace</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.namespace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.number">
+<span class="sig-name descname"><span class="pre">number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.oldstate">
+<span class="sig-name descname"><span class="pre">oldstate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.oldstate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.state">
+<span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.when">
+<span class="sig-name descname"><span class="pre">when</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.when" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.RequestStateChangedPayload.who">
+<span class="sig-name descname"><span class="pre">who</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.rabbit_listener.RequestStateChangedPayload.who" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.main">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.rabbit_listener.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.merge_pr">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">merge_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.db.PullRequestToSubmitRequest" title="scm_staging.db.PullRequestToSubmitRequest"><span class="pre">PullRequestToSubmitRequest</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ApiClient</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.rabbit_listener.merge_pr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.pr_from_pkg_name">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">pr_from_pkg_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.rabbit_listener.PackageBuildSuccessPayload" title="scm_staging.rabbit_listener.PackageBuildSuccessPayload"><span class="pre">PackageBuildSuccessPayload</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.rabbit_listener.PackageBuildFailurePayload" title="scm_staging.rabbit_listener.PackageBuildFailurePayload"><span class="pre">PackageBuildFailurePayload</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.rabbit_listener.PackageBuildUnchangedPayload" title="scm_staging.rabbit_listener.PackageBuildUnchangedPayload"><span class="pre">PackageBuildUnchangedPayload</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">osc_username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ApiClient</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PullRequest</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.rabbit_listener.pr_from_pkg_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.rabbit_listener.rabbit_listener">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.rabbit_listener.</span></span><span class="sig-name descname"><span class="pre">rabbit_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.rabbit_listener.rabbit_listener" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-scm_staging.ci_status">
+<span id="ci-status-module"></span><h2><a class="reference internal" href="#module-scm_staging.ci_status" title="scm_staging.ci_status"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ci_status</span></code></a> module<a class="headerlink" href="#module-scm_staging.ci_status" title="Permalink to this heading">¶</a></h2>
+<p>This module contains helper functions to set the commit status (= CI status)
+on gitea based on the package build on OBS.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.ci_status.CommitStatusState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.ci_status.</span></span><span class="sig-name descname"><span class="pre">CommitStatusState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.ci_status.CommitStatusState" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.ci_status.CommitStatusState.ERROR">
+<span class="sig-name descname"><span class="pre">ERROR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'error'</span></em><a class="headerlink" href="#scm_staging.ci_status.CommitStatusState.ERROR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.ci_status.CommitStatusState.FAILURE">
+<span class="sig-name descname"><span class="pre">FAILURE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'failure'</span></em><a class="headerlink" href="#scm_staging.ci_status.CommitStatusState.FAILURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.ci_status.CommitStatusState.PENDING">
+<span class="sig-name descname"><span class="pre">PENDING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pending'</span></em><a class="headerlink" href="#scm_staging.ci_status.CommitStatusState.PENDING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.ci_status.CommitStatusState.SUCCESS">
+<span class="sig-name descname"><span class="pre">SUCCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'success'</span></em><a class="headerlink" href="#scm_staging.ci_status.CommitStatusState.SUCCESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.ci_status.CommitStatusState.WARNING">
+<span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'warning'</span></em><a class="headerlink" href="#scm_staging.ci_status.CommitStatusState.WARNING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.ci_status.fetch_hash_of_head_of_branch">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.ci_status.</span></span><span class="sig-name descname"><span class="pre">fetch_hash_of_head_of_branch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ApiClient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_owner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'main'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#scm_staging.ci_status.fetch_hash_of_head_of_branch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.ci_status.main">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.ci_status.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.ci_status.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.ci_status.set_commit_status_from_obs">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.ci_status.</span></span><span class="sig-name descname"><span class="pre">set_commit_status_from_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">osc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Osc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ApiClient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_owner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit_sha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkg_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.ci_status.set_commit_status_from_obs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-scm_staging.config">
+<span id="config-module"></span><h2><a class="reference internal" href="#module-scm_staging.config" title="scm_staging.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a> module<a class="headerlink" href="#module-scm_staging.config" title="Permalink to this heading">¶</a></h2>
+<p>The config module contains the Models that are loaded from the webhook json
+config file.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.config.BranchConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.config.</span></span><span class="sig-name descname"><span class="pre">BranchConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_branch_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_approval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination_project</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">submission_style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#scm_staging.config.SubmissionStyle" title="scm_staging.config.SubmissionStyle"><span class="pre">SubmissionStyle</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">SubmissionStyle.DIRECT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_pr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.config.BranchConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration entry of the bot for how to treat merge requests for a
+certain organization.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.config.BranchConfig.destination_project">
+<span class="sig-name descname"><span class="pre">destination_project</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.config.BranchConfig.destination_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>project name on OBS against which the package should be submitted</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.config.BranchConfig.merge_pr">
+<span class="sig-name descname"><span class="pre">merge_pr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#scm_staging.config.BranchConfig.merge_pr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether the bot shall merge the pull request once the submitrequest is
+accepted. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.config.BranchConfig.organization">
+<span class="sig-name descname"><span class="pre">organization</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.config.BranchConfig.organization" title="Permalink to this definition">¶</a></dt>
+<dd><p>organization (= username) for which pull requests will be monitored</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.config.BranchConfig.require_approval">
+<span class="sig-name descname"><span class="pre">require_approval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#scm_staging.config.BranchConfig.require_approval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether merge requests have to be approved by the package maintainer
+first, before a submitrequest is created. The default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.config.BranchConfig.submission_style">
+<span class="sig-name descname"><span class="pre">submission_style</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scm_staging.config.SubmissionStyle" title="scm_staging.config.SubmissionStyle"><span class="pre">SubmissionStyle</span></a></em><a class="headerlink" href="#scm_staging.config.BranchConfig.submission_style" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines how the bot should submit the packages, defaults to a direct
+submission (<a class="reference internal" href="#scm_staging.config.SubmissionStyle.DIRECT" title="scm_staging.config.SubmissionStyle.DIRECT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SubmissionStyle.DIRECT</span></code></a>)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.config.BranchConfig.target_branch_name">
+<span class="sig-name descname"><span class="pre">target_branch_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scm_staging.config.BranchConfig.target_branch_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>name of the branch against which the pull requests should be considered</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scm_staging.config.SubmissionStyle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.config.</span></span><span class="sig-name descname"><span class="pre">SubmissionStyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.config.SubmissionStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Options how the bot will submit packages.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.config.SubmissionStyle.DIRECT">
+<span class="sig-name descname"><span class="pre">DIRECT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'direct'</span></em><a class="headerlink" href="#scm_staging.config.SubmissionStyle.DIRECT" title="Permalink to this definition">¶</a></dt>
+<dd><p>the bot submits the package directly to the destination project</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scm_staging.config.SubmissionStyle.FACTORY_DEVEL">
+<span class="sig-name descname"><span class="pre">FACTORY_DEVEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'factory_devel'</span></em><a class="headerlink" href="#scm_staging.config.SubmissionStyle.FACTORY_DEVEL" title="Permalink to this definition">¶</a></dt>
+<dd><p>the bot sends the project to the develproject defined in the destination
+project</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.config.load_config">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.config.</span></span><span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dot_json_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scm_staging.config.BranchConfig" title="scm_staging.config.BranchConfig"><span class="pre">scm_staging.config.BranchConfig</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#scm_staging.config.load_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the config from the json file with the provided path.</p>
+</dd></dl>
+
+</section>
+<section id="module-scm_staging.submit_to_pool">
+<span id="submit-to-pool-module"></span><h2><a class="reference internal" href="#module-scm_staging.submit_to_pool" title="scm_staging.submit_to_pool"><code class="xref py py-mod docutils literal notranslate"><span class="pre">submit_to_pool</span></code></a> module<a class="headerlink" href="#module-scm_staging.submit_to_pool" title="Permalink to this heading">¶</a></h2>
+<p>This module has a helper function to automatically create a pull request from
+<code class="docutils literal notranslate"><span class="pre">gitea.opensuse.org/rpm/$pkg</span></code> to <code class="docutils literal notranslate"><span class="pre">gitea.opensuse.org/pool/$pkg</span></code>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.submit_to_pool.create_pr_to_pool">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scm_staging.submit_to_pool.</span></span><span class="sig-name descname"><span class="pre">create_pr_to_pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkg_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gitea_user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_api</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RepositoryApi</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#scm_staging.submit_to_pool.create_pr_to_pool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scm_staging.submit_to_pool.main">
+<span class="sig-prename descclassname"><span class="pre">scm_staging.submit_to_pool.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scm_staging.submit_to_pool.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">scm-staging</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Git workflow setup</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-scm_staging.webhook"><code class="xref py py-mod docutils literal notranslate"><span class="pre">webhook</span></code> module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scm_staging.db"><code class="xref py py-mod docutils literal notranslate"><span class="pre">db</span></code> module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scm_staging.rabbit_listener"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rabbit_listener</span></code> module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scm_staging.ci_status"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ci_status</span></code> module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scm_staging.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code> module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scm_staging.submit_to_pool"><code class="xref py py-mod docutils literal notranslate"><span class="pre">submit_to_pool</span></code> module</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="setup.html" title="previous chapter">Git workflow setup</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, SUSE LLC.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
