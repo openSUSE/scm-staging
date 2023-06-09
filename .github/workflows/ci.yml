@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build
-          path: ./build/html
+          path: ./build/
 
   deploy:
     name: deploy to the gh-pages branch
