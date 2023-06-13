@@ -244,10 +244,12 @@ def rabbit_listener(db_file: str) -> None:
 
         finally:
             if channel:
-                channel.close()
+                if channel.is_open:
+                    channel.close()
                 channel = None
             if connection:
-                connection.close()
+                if connection.is_open:
+                    connection.close()
                 connection = None
 
 
