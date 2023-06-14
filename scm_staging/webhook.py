@@ -378,35 +378,30 @@ class MainHandler(tornado.web.RequestHandler):
         await project.send_meta(osc, prj=prj)
         await project.send_meta(osc, prj=prj, pkg=pkg)
 
-        sr_kwargs = {
-            "osc": osc,
-            "source_prj": prj.name,
-            "pkg_name": pkg.name,
-            "supersede_old_request": True,
-            "description": f"🤖: Submission of {pkg.name} via {payload.pull_request.url}",
-        }
-
         if (
             sr_style := matching_branch_conf.submission_style
         ) == SubmissionStyle.DIRECT:
-            sr_kwargs["dest_prj"] = matching_branch_conf.destination_project
+            dest_prj = matching_branch_conf.destination_project
 
         elif sr_style == SubmissionStyle.FACTORY_DEVEL:
-            devel_prj = await self.find_devel_project(
+            dest_prj = await self.find_devel_project(
                 matching_branch_conf.destination_project, pkg.name
             )
-            if not devel_prj:
+            if not dest_prj:
                 raise ValueError(
                     f"Could not find the develproject for {pkg.name} in {matching_branch_conf.destination_project}"
                 )
-
-            sr_kwargs["dest_prj"] = await request.submit_package(
-                dest_prj=devel_prj, **sr_kwargs
-            )
         else:
             assert False, f"Invalid submission style {sr_style}"
 
-        new_req = await request.submit_package(**sr_kwargs)
+        new_req = await request.submit_package(
+            osc,
+            source_prj=prj.name,
+            pkg_name=pkg.name,
+            supersede_old_request=True,
+            dest_prj=dest_prj,
+            description=f"🤖: Submission of {pkg.name} via {payload.pull_request.url} by {payload.sender.login}",
+        )
 
         create_db(self.app_config.db_file_name)
 
