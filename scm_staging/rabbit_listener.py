@@ -11,14 +11,14 @@ from pika.exchange_type import ExchangeType
 from pika.spec import Basic
 import pika
 import pika.exceptions
-from py_gitea_opensuse_org import ApiClient
-
-
-from typing import NotRequired, TypedDict
-from py_gitea_opensuse_org import MergePullRequestOption
-from py_gitea_opensuse_org.api.repository_api import RepositoryApi
-from py_gitea_opensuse_org.models.pull_request import PullRequest
-
+from py_gitea_opensuse_org import (
+    CreateIssueCommentOption,
+    MergePullRequestOption,
+    RepositoryApi,
+    EditPullRequestOption,
+    IssueApi,
+)
+from py_obs.request import RequestStatus
 from pydantic import BaseModel, ValidationError
 
 from scm_staging.ci_status import set_commit_status_from_obs
@@ -121,7 +121,39 @@ class RequestCommentPayload(RequestChangedPayload):
 
 
 #: routing key of the message that a request change its state
-_SR_ACK_ROUTING_KEY = f"{_PREFIX}.request.state_change"
+# _SR_ACK_ROUTING_KEY = f"{_PREFIX}.request.state_change"
+
+_SR_CREATE_RK = f"{_PREFIX}.request.create"
+_SR_CHANGE_RK = f"{_PREFIX}.request.change"
+_SR_DELETE_RK = f"{_PREFIX}.request.delete"
+_SR_STATE_CHANGE_RK = f"{_PREFIX}.request.state_change"
+_SR_REVIEW_WANTED_RK = f"{_PREFIX}.request.review_wanted"
+_SR_REVIEW_CHANGED_RK = f"{_PREFIX}.request.review_changed"
+_SR_REVIEWS_DONE_RK = f"{_PREFIX}.request.reviews_done"
+_SR_COMMENT_RK = f"{_PREFIX}.request.comment"
+
+
+_RT_TO_TYPE_MAPPING = {
+    _SR_CREATE_RK: RequestChangedPayload,
+    _SR_CHANGE_RK: RequestChangedPayload,
+    _SR_DELETE_RK: RequestChangedPayload,
+    _SR_STATE_CHANGE_RK: RequestStateChangedPayload,
+    # _SR_REVIEW_WANTED_RK: Revie
+    _SR_REVIEW_CHANGED_RK: RequestReviewChangedPayload,
+    _SR_REVIEWS_DONE_RK: RequestReviewsDonePayload,
+    _SR_COMMENT_RK: RequestCommentPayload,
+}
+
+
+def _process_message(routing_key: str, body: str) -> None:
+    if routing_key not in _RT_TO_TYPE_MAPPING.keys():
+        return
+
+    payload_type = _RT_TO_TYPE_MAPPING[routing_key]
+    payload = payload_type(**json.loads(body))
+
+    if routing_key in (_SR_COMMENT_RK, _SR_STATE_CHANGE_RK):
+        LOGGER.info(payload)
 
 
 def rabbit_listener(db_file: str) -> None:
@@ -134,37 +166,102 @@ def rabbit_listener(db_file: str) -> None:
         properties: pika.BasicProperties,
         body: bytes,
     ) -> None:
+        try:
+            _process_message(method.routing_key or "", body.decode())
+        except ValidationError as err:
+            LOGGER.error(
+                "Failed to process '%s' with payload: '%s', got error: %s",
+                method.routing_key,
+                body.decode(),
+                err,
+            )
+
         if (method.routing_key or "") not in (
             f"{_PREFIX}.package.build_success",
             f"{_PREFIX}.package.build_fail",
             f"{_PREFIX}.package.build_unchanged",
-            _SR_ACK_ROUTING_KEY,
+            _SR_STATE_CHANGE_RK,
+            _SR_COMMENT_RK,
         ):
             return
 
-        if method.routing_key == _SR_ACK_ROUTING_KEY:
-            try:
-                rq_payload: RequestStateChangedPayload = json.loads(body.decode())
-                if rq_payload["state"] == "accepted" and (
-                    prs := find_submitrequests(db_file, sr_id=rq_payload["number"])
-                ):
-                    assert len(prs) == 1
         repo_api = RepositoryApi(app_config._api_client)
+        issue_api = IssueApi(app_config._api_client)
+
+        class Kwargs(TypedDict):
+            owner: str
+            repo: str
+            index: int
+
+        def gitea_api_kwargs_from_pr_list(
+            prs: list[PullRequestToSubmitRequest],
+        ) -> Kwargs:
+            return {
+                "owner": prs[0].gitea_repo_owner,
+                "repo": prs[0].gitea_repo_name,
+                "index": prs[0].pull_request_number,
+            }
+
+        if method.routing_key == _SR_STATE_CHANGE_RK:
+            rq_payload = RequestStateChangedPayload(**json.loads(body.decode()))
+            if prs := find_submitrequests(db_file, sr_id=rq_payload.number):
+                assert len(prs) == 1
+
+                kwargs = gitea_api_kwargs_from_pr_list(prs)
+
+                if rq_payload.state == RequestStatus.ACCEPTED:
                     if prs[0].merge_pr:
                         loop.run_until_complete(
                             repo_api.repo_merge_pull_request(
                                 **kwargs, body=MergePullRequestOption(Do="merge")
                             )
                         )
-                    remove_submit_request(db_file, prs[0].submit_request_id)
+                elif rq_payload.state == RequestStatus.DECLINED:
+                    loop.run_until_complete(
+                        repo_api.repo_edit_pull_request(
+                            **kwargs, body=EditPullRequestOption(state="closed")
+                        )
+                    )
 
-            except Exception as exc:
-                LOGGER.debug(
-                    "Failed to process message with the body '%s', got the exception '%s'",
-                    body.decode(),
-                    exc,
+                    loop.run_until_complete(
+                        issue_api.issue_create_comment(
+                            **kwargs,
+                            body=CreateIssueCommentOption(
+                                body=f"""Submit Request [sr#{prs[0].submit_request_id}](https://build.opensuse.org/request/show/{prs[0].submit_request_id}) has been declined by {rq_payload.who}:
+{rq_payload.comment}"""
+                            ),
+                        )
+                    )
+
+                else:
+                    return
+
+                remove_submit_request(db_file, prs[0].submit_request_id)
+            return
+
+        elif method.routing_key == _SR_COMMENT_RK:
+            comment_payload = RequestCommentPayload(**json.loads(body.decode()))
+
+            # don't mirror comments by the bot (these are just SR closed/created
+            # messages and similar ones)
+            if comment_payload.commenter == app_config.osc.username:
+                return
+
+            if prs := find_submitrequests(db_file, sr_id=comment_payload.number):
+                assert len(prs) == 1
+
+                kwargs = gitea_api_kwargs_from_pr_list(prs)
+
+                loop.run_until_complete(
+                    issue_api.issue_create_comment(
+                        **kwargs,
+                        body=CreateIssueCommentOption(
+                            body=f"""New comment by {comment_payload.commenter}:
+{comment_payload.comment_body}
+"""
+                        ),
+                    )
                 )
-                pass
             return
 
         try:
