@@ -88,38 +88,8 @@ class RequestStateChangedPayload(TypedDict):
     duration: int
 
 
-async def pr_from_pkg_name(
-    payload: PackageBuildSuccessPayload
-    | PackageBuildFailurePayload
-    | PackageBuildUnchangedPayload,
-    osc_username: str,
-    api_client: ApiClient,
-) -> PullRequest | None:
-    if not f"home:{osc_username}:SCM_STAGING:Factory" in payload["project"]:
-        return None
-
-    repo_api = RepositoryApi(api_client)
-
-    repo_name, pr_num = payload["project"].split(":")[-2:]
-    if repo_name != payload["package"]:
-        raise ValueError(
-            f"Mismatch in the package name, got {repo_name} from the project and {payload['package']} from the package itself."
-        )
-    return await repo_api.repo_get_pull_request(
-        "rpm",
-        repo_name,
-        int(pr_num),
-    )
 
 
-async def merge_pr(pr: PullRequestToSubmitRequest, api_client: ApiClient) -> None:
-    repo_api = RepositoryApi(api_client)
-    await repo_api.repo_merge_pull_request(
-        owner=pr.gitea_repo_owner,
-        repo=pr.gitea_repo_name,
-        index=pr.pull_request_number,
-        body=MergePullRequestOption(Do="merge"),
-    )
 
 
 #: routing key of the message that a request change its state
@@ -151,9 +121,12 @@ def rabbit_listener(db_file: str) -> None:
                     prs := find_submitrequests(db_file, sr_id=rq_payload["number"])
                 ):
                     assert len(prs) == 1
+        repo_api = RepositoryApi(app_config._api_client)
                     if prs[0].merge_pr:
                         loop.run_until_complete(
-                            merge_pr(prs[0], app_config._api_client)
+                            repo_api.repo_merge_pull_request(
+                                **kwargs, body=MergePullRequestOption(Do="merge")
+                            )
                         )
                     remove_submit_request(db_file, prs[0].submit_request_id)
 
