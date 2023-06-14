@@ -148,7 +148,7 @@ def find_submitrequests(
         with con:
             select = "SELECT * FROM requests"
 
-            params = ()
+            params: tuple[int | str, ...] = ()
             select_params = [
                 (param, key)
                 for param, key in (
