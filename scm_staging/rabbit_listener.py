@@ -19,6 +19,7 @@ from py_gitea_opensuse_org import MergePullRequestOption
 from py_gitea_opensuse_org.api.repository_api import RepositoryApi
 from py_gitea_opensuse_org.models.pull_request import PullRequest
 
+from pydantic import BaseModel, ValidationError
 
 from scm_staging.ci_status import set_commit_status_from_obs
 from scm_staging.db import (
@@ -34,22 +35,22 @@ from scm_staging.webhook import DEFAULT_DB_NAME, AppConfig
 _PREFIX = "opensuse.obs"
 
 
-class PackageBuildSuccessPayload(TypedDict):
+class PackageBuildSuccessPayload(BaseModel):
     project: str
     package: str
     repository: str
     arch: str
-    release: str
+    release: str | None
     readytime: str
     srcmd5: str
-    rev: str
+    rev: str | None
     reason: str
-    bcnt: str
-    verifymd5: str
+    bcnt: str | None
+    verifymd5: str | None
     starttime: str
     endtime: str
     workerid: str
-    versrel: str
+    versrel: str | None
     buildtype: str
 
 
@@ -61,35 +62,62 @@ class PackageBuildUnchangedPayload(PackageBuildSuccessPayload):
     pass
 
 
-class ActionPayload(TypedDict):
+class ActionPayload(BaseModel):
     action_id: int
     type: str
-    sourceproject: str
-    sourcepackage: str
-    sourcerevision: str
+    sourceproject: str | None
+    sourcepackage: str | None
+    sourcerevision: str | None
     targetproject: str
-    targetpackage: str
-    makeoriginolder: NotRequired[bool]
-    sourceupdate: NotRequired[str]
+    targetpackage: str | None
+    makeoriginolder: bool | None
+    sourceupdate: str | None
 
 
-class RequestStateChangedPayload(TypedDict):
+class RequestChangedPayload(BaseModel):
     author: str
-    comment: str
-    description: str
-    id: int
+    comment: str | None
+    description: str | None
     number: int
     actions: list[ActionPayload]
     state: str
     when: str
     who: str
+
+
+class RequestStateChangedPayload(RequestChangedPayload):
+    id: int
     oldstate: str
     namespace: str
-    duration: int
+    duration: int | None
 
 
+class RequestReviewChangedPayload(BaseModel):
+    reviewers: str | None
+    by_user: str | None
+    by_group: str | None
+    by_project: str | None
+    by_package: str | None
 
 
+class RequestReviewsDonePayload(RequestReviewChangedPayload):
+    author: str
+    comment: str
+    description: str | None
+    number: int
+    actions: list[ActionPayload]
+    state: str
+    when: str
+    who: str
+
+
+class RequestCommentPayload(RequestChangedPayload):
+    commenters: list[str]
+    commenter: str
+    comment_body: str
+    comment_title: str | None
+    # useless field, use number instead
+    request_number: int | None
 
 
 #: routing key of the message that a request change its state
@@ -140,19 +168,22 @@ def rabbit_listener(db_file: str) -> None:
             return
 
         try:
-            payload: PackageBuildSuccessPayload | PackageBuildFailurePayload = (
-                json.loads(body.decode())
-            )
+            kwargs = json.loads(body.decode())
+            try:
+                payload = PackageBuildFailurePayload(**kwargs)
+            except ValidationError:
+                payload = PackageBuildSuccessPayload(**kwargs)
+
             prs = find_submitrequests(
                 db_file,
-                obs_project_name=payload["project"],
-                obs_package_name=payload["package"],
+                obs_project_name=payload.project,
+                obs_package_name=payload.package,
             )
             if len(prs) == 1:
                 LOGGER.debug(
-                    "package %s got built in %s", payload["package"], payload["project"]
+                    "package %s got built in %s", payload.package, payload.project
                 )
-                repo_api = RepositoryApi(app_config._api_client)
+
                 # get the pr for the commit sha
                 pr = loop.run_until_complete(
                     repo_api.repo_get_pull_request(
@@ -168,12 +199,17 @@ def rabbit_listener(db_file: str) -> None:
                         commit_sha=pr.head.sha,
                         repo_name=prs[0].gitea_repo_name,
                         repo_owner=prs[0].gitea_repo_owner,
-                        pkg_name=payload["package"],
-                        project_name=payload["project"],
+                        pkg_name=payload.package,
+                        project_name=payload.project,
                     )
                 )
-        except Exception:
-            pass
+        except Exception as exc:
+            LOGGER.error(
+                "Failed to set commit status from msg '%s': '%s', got: %s",
+                method.routing_key,
+                kwargs,
+                exc,
+            )
 
     while True:
         connection: pika.BlockingConnection | None = None
