@@ -124,7 +124,7 @@ def main() -> None:
         type=str,
         nargs=1,
         required=True,
-        help="repository on gitea.opensuse.org in the format $repo_owner/$repo_name",
+        help="repository on src.opensuse.org in the format $repo_owner/$repo_name",
     )
     parser.add_argument(
         "--commit-sha",

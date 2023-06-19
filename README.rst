@@ -69,6 +69,6 @@ Setup
 
    podman exec -it webhook poetry run rabbit_listener
 
-6. Go to your dist-git repository on https://gitea.opensuse.org and add a
+6. Go to your dist-git repository on https://src.opensuse.org and add a
    webhook with the url ``$YOUR_HOST_IP/hook:8000``. Or add it for a whole
    organization or the full gitea instance.

@@ -1,5 +1,5 @@
 """This module has a helper function to automatically create a pull request from
-``gitea.opensuse.org/rpm/$pkg`` to ``gitea.opensuse.org/pool/$pkg``.
+``src.opensuse.org/rpm/$pkg`` to ``src.opensuse.org/pool/$pkg``.
 
 """
 
@@ -29,10 +29,10 @@ async def create_pr_to_pool(
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         repo = Repo.clone_from(
-            url=f"gitea@gitea.opensuse.org:{gitea_user}/{pkg_name}.git", to_path=tmp_dir
+            url=f"gitea@src.opensuse.org:{gitea_user}/{pkg_name}.git", to_path=tmp_dir
         )
         remote = Remote.create(
-            repo=repo, name="rpm", url=f"https://gitea.opensuse.org/rpm/{pkg_name}"
+            repo=repo, name="rpm", url=f"https://src.opensuse.org/rpm/{pkg_name}"
         )
         remote.fetch()
 

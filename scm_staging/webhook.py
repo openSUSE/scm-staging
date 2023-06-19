@@ -149,7 +149,7 @@ class AppConfig:
         conf = Configuration(
             api_key={"AuthorizationHeaderToken": api_key},
             api_key_prefix={"AuthorizationHeaderToken": "token"},
-            host="https://gitea.opensuse.org/api/v1",
+            host="https://src.opensuse.org/api/v1",
         )
 
         return AppConfig(
