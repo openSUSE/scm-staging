@@ -5,9 +5,12 @@ The rabbit listener and the webhook share information via the database.
 
 """
 
+from argparse import ArgumentParser
 import sqlite3
 
 from pydantic import BaseModel
+
+DEFAULT_DB_NAME = "submit_requests.db"
 
 
 class PullRequestToSubmitRequest(BaseModel):
@@ -179,3 +182,13 @@ def find_submitrequests(
             ]
     finally:
         con.close()
+
+
+def add_db_file_arg(parser: ArgumentParser) -> ArgumentParser:
+    parser.add_argument(
+        "--db-file",
+        nargs=1,
+        default=[DEFAULT_DB_NAME],
+        help="SQLite3 database tracking the submitrequests",
+    )
+    return parser

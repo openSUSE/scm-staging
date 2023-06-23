@@ -13,23 +13,23 @@ import pika
 import pika.exceptions
 from py_gitea_opensuse_org import (
     CreateIssueCommentOption,
-    MergePullRequestOption,
     RepositoryApi,
-    EditPullRequestOption,
     IssueApi,
 )
 from py_obs.request import RequestStatus
 from pydantic import BaseModel, ValidationError
 
 from scm_staging.ci_status import set_commit_status_from_obs
+from scm_staging.cleanup import process_sr
 from scm_staging.db import (
     PullRequestToSubmitRequest,
+    add_db_file_arg,
     create_db,
     find_submitrequests,
     remove_submit_request,
 )
 from scm_staging.logger import LOGGER
-from scm_staging.webhook import DEFAULT_DB_NAME, AppConfig
+from scm_staging.webhook import AppConfig
 
 
 _PREFIX = "opensuse.obs"
@@ -80,7 +80,7 @@ class RequestChangedPayload(BaseModel):
     description: str | None
     number: int
     actions: list[ActionPayload]
-    state: str
+    state: RequestStatus
     when: str
     who: str
 
@@ -120,9 +120,7 @@ class RequestCommentPayload(RequestChangedPayload):
     request_number: int | None
 
 
-#: routing key of the message that a request change its state
-# _SR_ACK_ROUTING_KEY = f"{_PREFIX}.request.state_change"
-
+#: routing keys of the messages involving requests and comments
 _SR_CREATE_RK = f"{_PREFIX}.request.create"
 _SR_CHANGE_RK = f"{_PREFIX}.request.change"
 _SR_DELETE_RK = f"{_PREFIX}.request.delete"
@@ -133,6 +131,7 @@ _SR_REVIEWS_DONE_RK = f"{_PREFIX}.request.reviews_done"
 _SR_COMMENT_RK = f"{_PREFIX}.request.comment"
 
 
+#: mapping between the message key and the corresponding model
 _RT_TO_TYPE_MAPPING = {
     _SR_CREATE_RK: RequestChangedPayload,
     _SR_CHANGE_RK: RequestChangedPayload,
@@ -146,14 +145,12 @@ _RT_TO_TYPE_MAPPING = {
 
 
 def _process_message(routing_key: str, body: str) -> None:
+    """Smoke test for the message payload models"""
     if routing_key not in _RT_TO_TYPE_MAPPING.keys():
         return
 
     payload_type = _RT_TO_TYPE_MAPPING[routing_key]
-    payload = payload_type(**json.loads(body))
-
-    if routing_key in (_SR_COMMENT_RK, _SR_STATE_CHANGE_RK):
-        LOGGER.info(payload)
+    payload_type(**json.loads(body))
 
 
 def rabbit_listener(db_file: str) -> None:
@@ -207,36 +204,15 @@ def rabbit_listener(db_file: str) -> None:
             if prs := find_submitrequests(db_file, sr_id=rq_payload.number):
                 assert len(prs) == 1
 
-                kwargs = gitea_api_kwargs_from_pr_list(prs)
-
-                if rq_payload.state == RequestStatus.ACCEPTED:
-                    if prs[0].merge_pr:
-                        loop.run_until_complete(
-                            repo_api.repo_merge_pull_request(
-                                **kwargs, body=MergePullRequestOption(Do="merge")
-                            )
-                        )
-                elif rq_payload.state == RequestStatus.DECLINED:
-                    loop.run_until_complete(
-                        repo_api.repo_edit_pull_request(
-                            **kwargs, body=EditPullRequestOption(state="closed")
-                        )
+                if loop.run_until_complete(
+                    process_sr(
+                        sr_state=rq_payload.state,
+                        pr_to_sr=prs[0],
+                        api_client=app_config._api_client,
                     )
+                ):
+                    remove_submit_request(db_file, prs[0].submit_request_id)
 
-                    loop.run_until_complete(
-                        issue_api.issue_create_comment(
-                            **kwargs,
-                            body=CreateIssueCommentOption(
-                                body=f"""Submit Request [sr#{prs[0].submit_request_id}](https://build.opensuse.org/request/show/{prs[0].submit_request_id}) has been declined by {rq_payload.who}:
-{rq_payload.comment}"""
-                            ),
-                        )
-                    )
-
-                else:
-                    return
-
-                remove_submit_request(db_file, prs[0].submit_request_id)
             return
 
         elif method.routing_key == _SR_COMMENT_RK:
@@ -264,6 +240,7 @@ def rabbit_listener(db_file: str) -> None:
                 )
             return
 
+        kwargs = None
         try:
             kwargs = json.loads(body.decode())
             try:
@@ -363,12 +340,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--db-file",
-        nargs=1,
-        default=[DEFAULT_DB_NAME],
-        help="SQLite3 database tracking the submitrequests",
-    )
+    parser = add_db_file_arg(parser)
 
     args = parser.parse_args()
     db_file = args.db_file[0]

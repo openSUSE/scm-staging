@@ -34,6 +34,7 @@ from scm_staging.ci_status import set_commit_status_from_obs
 from scm_staging.config import BranchConfig, SubmissionStyle, load_config
 from scm_staging.logger import LOGGER
 from scm_staging.db import (
+    DEFAULT_DB_NAME,
     PullRequestToSubmitRequest,
     create_db,
     insert_submit_request,
@@ -125,9 +126,6 @@ class PullRequestPayload(BaseModel):
     sender: User
     repository: Repository
     review: Review | None
-
-
-DEFAULT_DB_NAME = "submit_requests.db"
 
 
 @dataclass(frozen=True)
@@ -457,15 +455,24 @@ define(
 
 
 def main():
+    from scm_staging.cleanup import process_all_stored_srs
+
     options.parse_command_line()
     LOGGER.configure_log_files(
         options.log, options.access_log, options.app_log, options.general_log
     )
     app_config = AppConfig.from_env()
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(
+        process_all_stored_srs(
+            app_config.osc, app_config._api_client, app_config.db_file_name
+        )
+    )
+
     app = make_app(app_config)
     app.listen(options.port)
     shutdown_event = asyncio.Event()
-    loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(shutdown_event.wait())
     finally:
