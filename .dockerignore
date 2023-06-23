@@ -1,0 +1,6 @@
+submit_requests.db
+config.json
+.git
+.github
+.mypy_cache
+.pytest_cache
