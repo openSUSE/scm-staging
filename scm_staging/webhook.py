@@ -213,16 +213,15 @@ class MainHandler(tornado.web.RequestHandler):
         repo_name: str,
         pr_number: int,
         pkg_name: str,
+        pr_creator: str,
     ) -> bool:
-        """Checks if the pull request $owner/$repo_name/$pr_number has been approved
-        by at least one maintainer of the package `pkg_name` and no changes have
-        been requested.
+        """Checks if the pull request $owner/$repo_name/$pr_number has been
+        approved by at least one maintainer of the package `pkg_name` (and no
+        changes have been requested) or if the pull request has been submitted
+        by one of the maintainers of that package.
 
         """
         repo_api = RepositoryApi(api_client)
-        reviews: list[PullReview] = await repo_api.repo_list_pull_reviews(
-            owner, repo_name, pr_number
-        )
 
         maintainers = await project.search_for_maintainers(
             self.app_config.osc,
@@ -236,6 +235,11 @@ class MainHandler(tornado.web.RequestHandler):
             usernames.extend(pers.name for pers in maintainers.project)
 
         usernames = list(set(usernames))
+
+        if pr_creator in usernames:
+            return True
+
+        reviews = await repo_api.repo_list_pull_reviews(owner, repo_name, pr_number)
 
         valid_reviews = []
         for review in reviews:
@@ -375,6 +379,7 @@ class MainHandler(tornado.web.RequestHandler):
                 repo_name=repo_name,
                 pr_number=pr_num,
                 pkg_name=pkg.name,
+                pr_creator=payload.pull_request.user.login,
             ):
                 LOGGER.debug("PR has not been approved, approval required")
                 return
