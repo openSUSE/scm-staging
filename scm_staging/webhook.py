@@ -175,10 +175,16 @@ class MainHandler(tornado.web.RequestHandler):
     def initialize(self, app_config: AppConfig) -> None:
         self.app_config = app_config
 
-    def project_from_pull_request(self, payload: PullRequestPayload) -> project.Project:
+    def project_from_pull_request(
+        self, payload: PullRequestPayload, project_prefix: str | None
+    ) -> project.Project:
         pr = payload.pull_request
+        prj_name = (
+            project_prefix if project_prefix else f"home:{self.app_config.osc.username}"
+        ) + f":SCM_STAGING:{payload.repository.name}:{pr.number}"
+
         return project.Project(
-            name=f"home:{self.app_config.osc.username}:SCM_STAGING:{payload.repository.name}:{pr.number}",
+            name=prj_name,
             title=StrElementField(f"Project for Pull Request {pr.number}"),
             description=StrElementField(f"Project for Pull Request {pr.url}"),
             person=[
@@ -301,7 +307,9 @@ class MainHandler(tornado.web.RequestHandler):
             return
 
         pkg = package_from_pull_request(payload)
-        prj = self.project_from_pull_request(payload)
+        prj = self.project_from_pull_request(
+            payload, matching_branch_conf.project_prefix
+        )
 
         osc = self.app_config.osc
 

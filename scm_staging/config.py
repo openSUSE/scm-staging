@@ -47,6 +47,10 @@ class BranchConfig(BaseModel):
     #: accepted. Defaults to ``True``.
     merge_pr: bool = True
 
+    #: Project name prefix to be used for creating the projects for submit
+    #: request. If omitted, the user's home project will be used.
+    project_prefix: str | None = None
+
 
 def load_config(config_dot_json_path: str) -> list[BranchConfig]:
     """Read the config from the json file with the provided path."""
