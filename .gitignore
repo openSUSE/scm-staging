@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 /open-build-service/
+/submit_requests.db
+/config.json
