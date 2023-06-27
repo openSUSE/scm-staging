@@ -171,6 +171,22 @@ def package_from_pull_request(payload: PullRequestPayload) -> project.Package:
     )
 
 
+async def find_devel_project(
+    osc: Osc, project_name: str, package_name: str
+) -> project.DevelProject | None:
+    """Retrieve the develproject of the package with the supplied
+    ``package_name`` from the project ``project_name``.
+
+    Returns:
+        - the devel project or ``None`` if there is none
+
+    """
+    pkg = await project.fetch_meta(osc, prj=project_name, pkg=package_name)
+    if pkg.devel:
+        return pkg.devel
+    return None
+
+
 class MainHandler(tornado.web.RequestHandler):
     def initialize(self, app_config: AppConfig) -> None:
         self.app_config = app_config
@@ -253,29 +269,6 @@ class MainHandler(tornado.web.RequestHandler):
             return True
 
         return False
-
-    async def find_devel_project(
-        self, project_name: str, package_name: str
-    ) -> str | None:
-        """Retrieve the develproject of the package with the supplied
-        ``package_name`` from the project ``project_name``.
-
-        Returns:
-            - the develproject name or None if there is none or some error
-              occurred
-
-        """
-        try:
-            pkg = await project.fetch_meta(
-                self.app_config.osc, prj=project_name, pkg=package_name
-            )
-            if pkg.devel:
-                return pkg.devel.project
-        except Exception as exc:
-            LOGGER.error(
-                "Failed to retrieve the devel project of %s, got %s", package_name, exc
-            )
-        return None
 
     async def post(self) -> None:
         if not self.request.body:
