@@ -1,4 +1,4 @@
-FROM registry.fedoraproject.org/fedora:latest
+FROM registry.fedoraproject.org/fedora:latest as rabbit_listener
 
 RUN set -eux pipefail; dnf -y upgrade; dnf -y install pipx; PIPX_BIN_DIR=/usr/bin/ pipx install poetry
 
@@ -7,6 +7,10 @@ WORKDIR /src/
 
 RUN set -eux pipefail; poetry install
 
+ENTRYPOINT poetry run rabbit_listener
+
+
+FROM rabbit_listener as webhook
 EXPOSE 8000
 ENTRYPOINT poetry run app
 HEALTHCHECK --interval=5s --timeout=1s CMD curl http://localhost:8000/hook
