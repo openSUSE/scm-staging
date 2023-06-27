@@ -171,17 +171,57 @@ def package_from_pull_request(payload: PullRequestPayload) -> project.Package:
     )
 
 
+async def find_devel_project(
+    osc: Osc, project_name: str, package_name: str
+) -> project.DevelProject | None:
+    """Retrieve the develproject of the package with the supplied
+    ``package_name`` from the project ``project_name``.
+
+    Returns:
+        - the devel project or ``None`` if there is none
+
+    """
+    pkg = await project.fetch_meta(osc, prj=project_name, pkg=package_name)
+    if pkg.devel:
+        return pkg.devel
+    return None
+
+
 class MainHandler(tornado.web.RequestHandler):
     def initialize(self, app_config: AppConfig) -> None:
         self.app_config = app_config
 
-    def project_from_pull_request(
-        self, payload: PullRequestPayload, project_prefix: str | None
+    async def project_from_pull_request(
+        self,
+        payload: PullRequestPayload,
+        project_prefix: str | None,
+        project_to_copy_repos_from: str | None = None,
     ) -> project.Project:
         pr = payload.pull_request
         prj_name = (
             project_prefix if project_prefix else f"home:{self.app_config.osc.username}"
         ) + f":SCM_STAGING:{payload.repository.name}:{pr.number}"
+
+        repos = []
+        if project_to_copy_repos_from:
+            repos = (
+                await project.fetch_meta(
+                    self.app_config.osc, prj=project_to_copy_repos_from
+                )
+            ).repository
+
+        if not repos:
+            repos = [
+                project.Repository(
+                    name="openSUSE_Factory",
+                    arch=["x86_64"],
+                    path=[
+                        project.PathEntry(
+                            project="openSUSE:Factory", repository="snapshot"
+                        )
+                    ],
+                )
+            ]
 
         return project.Project(
             name=prj_name,
@@ -193,17 +233,7 @@ class MainHandler(tornado.web.RequestHandler):
                     role=project.PersonRole.MAINTAINER,
                 )
             ],
-            repository=[
-                project.Repository(
-                    name="openSUSE_Factory",
-                    arch=["x86_64"],
-                    path=[
-                        project.PathEntry(
-                            project="openSUSE:Factory", repository="snapshot"
-                        )
-                    ],
-                )
-            ],
+            repository=repos,
         )
 
     async def check_if_pr_approved(
@@ -254,29 +284,6 @@ class MainHandler(tornado.web.RequestHandler):
 
         return False
 
-    async def find_devel_project(
-        self, project_name: str, package_name: str
-    ) -> str | None:
-        """Retrieve the develproject of the package with the supplied
-        ``package_name`` from the project ``project_name``.
-
-        Returns:
-            - the develproject name or None if there is none or some error
-              occurred
-
-        """
-        try:
-            pkg = await project.fetch_meta(
-                self.app_config.osc, prj=project_name, pkg=package_name
-            )
-            if pkg.devel:
-                return pkg.devel.project
-        except Exception as exc:
-            LOGGER.error(
-                "Failed to retrieve the devel project of %s, got %s", package_name, exc
-            )
-        return None
-
     async def post(self) -> None:
         if not self.request.body:
             return
@@ -310,13 +317,39 @@ class MainHandler(tornado.web.RequestHandler):
             )
             return
 
+        osc = self.app_config.osc
         pkg = package_from_pull_request(payload)
-        prj = self.project_from_pull_request(
-            payload, matching_branch_conf.project_prefix
+
+        # find out if we want to send the SR directly to the destination or via
+        # the devel project
+        devel_prj = await find_devel_project(
+            osc, matching_branch_conf.destination_project, pkg.name
         )
 
-        osc = self.app_config.osc
+        if (
+            sr_style := matching_branch_conf.submission_style
+        ) == SubmissionStyle.DIRECT:
+            dest_prj = matching_branch_conf.destination_project
+            dest_pkg = None
 
+        elif sr_style == SubmissionStyle.FACTORY_DEVEL:
+            if not devel_prj:
+                raise ValueError(
+                    f"Could not find the develproject for {pkg.name} in {matching_branch_conf.destination_project}"
+                )
+            dest_prj = devel_prj.project
+            dest_pkg = devel_prj.package
+        else:
+            assert False, f"Invalid submission style {sr_style}"
+
+        prj = await self.project_from_pull_request(
+            payload,
+            matching_branch_conf.project_prefix,
+            project_to_copy_repos_from=devel_prj.project if devel_prj else dest_prj,
+        )
+
+        # Close all requests that were opened from the staging project if the PR
+        # is merged or closed and finally delete the staging project.
         if payload.action in ("closed", "merged"):
             tasks = []
 
@@ -389,28 +422,13 @@ class MainHandler(tornado.web.RequestHandler):
         await project.send_meta(osc, prj=prj)
         await project.send_meta(osc, prj=prj, pkg=pkg)
 
-        if (
-            sr_style := matching_branch_conf.submission_style
-        ) == SubmissionStyle.DIRECT:
-            dest_prj = matching_branch_conf.destination_project
-
-        elif sr_style == SubmissionStyle.FACTORY_DEVEL:
-            dest_prj = await self.find_devel_project(
-                matching_branch_conf.destination_project, pkg.name
-            )
-            if not dest_prj:
-                raise ValueError(
-                    f"Could not find the develproject for {pkg.name} in {matching_branch_conf.destination_project}"
-                )
-        else:
-            assert False, f"Invalid submission style {sr_style}"
-
         new_req = await request.submit_package(
             osc,
             source_prj=prj.name,
             pkg_name=pkg.name,
             supersede_old_request=True,
             dest_prj=dest_prj,
+            dest_pkg=dest_pkg,
             description=f"🤖: Submission of {pkg.name} via {payload.pull_request.url} by {payload.sender.login}",
         )
 
