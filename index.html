@@ -56,17 +56,18 @@ requests and eventually a full staging workflow from pull requests in gitea.</p>
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
-<li><p>Build the container:</p></li>
+<li><p>Build the containers:</p></li>
 </ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">buildah</span> <span class="n">bud</span> <span class="o">--</span><span class="n">layers</span> <span class="o">-</span><span class="n">t</span> <span class="n">webhook</span> <span class="o">-</span><span class="n">f</span> <span class="n">Dockerfile</span><span class="o">.</span><span class="n">webhook</span> <span class="o">.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">buildah</span> <span class="n">bud</span> <span class="o">--</span><span class="n">layers</span> <span class="o">-</span><span class="n">t</span> <span class="n">rabbit_listener</span> <span class="o">-</span><span class="n">f</span> <span class="n">Dockerfile</span><span class="o">.</span><span class="n">webhook</span> <span class="o">--</span><span class="n">target</span> <span class="n">rabbit_listener</span> <span class="o">.</span>
+<span class="n">buildah</span> <span class="n">bud</span> <span class="o">--</span><span class="n">layers</span> <span class="o">-</span><span class="n">t</span> <span class="n">webhook</span> <span class="o">-</span><span class="n">f</span> <span class="n">Dockerfile</span><span class="o">.</span><span class="n">webhook</span> <span class="o">--</span><span class="n">target</span> <span class="n">webhook</span> <span class="o">.</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="3">
-<li><p>Create a json configuration file. It contains a single list of objects, where
-each object configures the behavior of the bot for one organization on
+<li><p>Create the json configuration file. It contains a single list of objects,
+where each object configures the behavior of the bot for one organization on
 gitea. Each of these objects has the following contents (the keys
-<code class="docutils literal notranslate"><span class="pre">require_approval</span></code>, <code class="docutils literal notranslate"><span class="pre">submission_style</span></code> and <code class="docutils literal notranslate"><span class="pre">merge_pr</span></code> are optional),
-the keys are defined in the class
+<code class="docutils literal notranslate"><span class="pre">require_approval</span></code>, <code class="docutils literal notranslate"><span class="pre">submission_style</span></code>, <code class="docutils literal notranslate"><span class="pre">merge_pr</span></code> and
+<code class="docutils literal notranslate"><span class="pre">project_prefix</span></code> are optional), the keys are defined in the class
 <a class="reference internal" href="api.html#scm_staging.config.BranchConfig" title="scm_staging.config.BranchConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchConfig</span></code></a>:</p></li>
 </ol>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
@@ -75,28 +76,31 @@ the keys are defined in the class
   <span class="s2">&quot;destination_project&quot;</span><span class="p">:</span> <span class="s2">&quot;openSUSE:Factory&quot;</span><span class="p">,</span>
   <span class="s2">&quot;merge_pr&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
   <span class="s2">&quot;submission_style&quot;</span><span class="p">:</span> <span class="s2">&quot;factory_devel&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;require_approval&quot;</span><span class="p">:</span> <span class="n">true</span>
+  <span class="s2">&quot;require_approval&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+  <span class="s2">&quot;project_prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;devel:scm&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="4">
-<li><p>Launch the container:</p></li>
+<li><p>Launch the containers:</p></li>
 </ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>podman run -it -e GITEA_API_KEY=$YOUR_API_KEY       \
-               -e OSC_USER=$YOUR_OBS_ACCOUNT        \
-               -e &quot;OSC_PASSWORD=$YOUR_OBS_PASSWORD&quot; \
-               -p 8000:8000                         \
-               --name webhook                       \
-               localhost/webhook:latest
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>podman run -d -e GITEA_API_KEY=$YOUR_API_KEY        \
+              -e OSC_USER=$YOUR_OBS_ACCOUNT         \
+              -e &quot;OSC_PASSWORD=$YOUR_OBS_PASSWORD&quot;  \
+              -p 8000:8000                          \
+              --name webhook                        \
+              -v /path/to/config/scm_staging:/src:z \
+              localhost/webhook:latest
+
+podman run -d -e GITEA_API_KEY=$YOUR_API_KEY        \
+              -e OSC_USER=$YOUR_OBS_ACCOUNT         \
+              -e &quot;OSC_PASSWORD=$YOUR_OBS_PASSWORD&quot;  \
+              --name rabbit_listener                \
+              -v /path/to/config/scm_staging:/src:z \
+              localhost/rabbit_listener:latest
 </pre></div>
 </div>
 <ol class="arabic simple" start="5">
-<li><p>Launch the rabbit listener:</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">podman</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">webhook</span> <span class="n">poetry</span> <span class="n">run</span> <span class="n">rabbit_listener</span>
-</pre></div>
-</div>
-<ol class="arabic simple" start="6">
 <li><p>Go to your dist-git repository on <a class="reference external" href="https://src.opensuse.org">https://src.opensuse.org</a> and add a
 webhook with the url <code class="docutils literal notranslate"><span class="pre">$YOUR_HOST_IP/hook:8000</span></code>. Or add it for a whole
 organization or the full gitea instance.</p></li>
