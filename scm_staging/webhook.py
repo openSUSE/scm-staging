@@ -40,7 +40,6 @@ from scm_staging.db import (
     insert_submit_request,
     remove_submit_request,
 )
-import scm_staging.rabbit_listener as mq
 
 
 class User(BaseModel):
@@ -485,7 +484,7 @@ define(
     help="Filename for Tornado general log, default to console",
 )
 define(
-    "db-file",
+    "db_file",
     default="submit_requests.db",
     help="SQLite3 database tracking the submitrequests",
 )
@@ -493,12 +492,15 @@ define(
 
 def main():
     from scm_staging.cleanup import process_all_stored_srs
+    from scm_staging import rabbit_listener as mq
 
     options.parse_command_line()
     LOGGER.configure_log_files(
         options.log, options.access_log, options.app_log, options.general_log
     )
     app_config = AppConfig.from_env()
+    mq.create_db(options.db_file)
+    mq.rabbit_listener(options.db_file)
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(
@@ -506,8 +508,6 @@ def main():
             app_config.osc, app_config._api_client, app_config.db_file_name
         )
     )
-    mq.create_db(options.db)
-    mq.rabbit_listener(options.db)
 
     app = make_app(app_config)
     app.listen(options.port)
