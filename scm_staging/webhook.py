@@ -40,7 +40,7 @@ from scm_staging.db import (
     insert_submit_request,
     remove_submit_request,
 )
-
+import scm_staging.rabbit_listener as mq
 
 class User(BaseModel):
     id: int
@@ -483,6 +483,11 @@ define(
     default=None,
     help="Filename for Tornado general log, default to console",
 )
+define(
+    "db-file",
+    default="submit_requests.db",
+    help="SQLite3 database tracking the submitrequests",
+)
 
 
 def main():
@@ -500,6 +505,8 @@ def main():
             app_config.osc, app_config._api_client, app_config.db_file_name
         )
     )
+    mq.create_db(options.db)
+    mq.rabbit_listener(options.db)
 
     app = make_app(app_config)
     app.listen(options.port)
@@ -508,3 +515,6 @@ def main():
         loop.run_until_complete(shutdown_event.wait())
     finally:
         loop.run_until_complete(app_config.osc.teardown())
+
+if __name__ == "__main__":
+    main()
