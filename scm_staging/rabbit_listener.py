@@ -349,5 +349,6 @@ def main() -> None:
     create_db(db_file)
     rabbit_listener(db_file)
 
+
 if __name__ == "__main__":
     main()

@@ -42,6 +42,7 @@ from scm_staging.db import (
 )
 import scm_staging.rabbit_listener as mq
 
+
 class User(BaseModel):
     id: int
     login: str
@@ -515,6 +516,7 @@ def main():
         loop.run_until_complete(shutdown_event.wait())
     finally:
         loop.run_until_complete(app_config.osc.teardown())
+
 
 if __name__ == "__main__":
     main()
