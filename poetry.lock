@@ -903,7 +903,7 @@ aiohttp = "^3.8.4"
 type = "git"
 url = "https://github.com/dcermak/py-obs.git"
 reference = "main"
-resolved_reference = "3f2ab5931adec09049eca1e8a580c5fc47b05315"
+resolved_reference = "ea84247dd3d8b8074d669697c4d216399177ae0c"
 
 [[package]]
 name = "pydantic"

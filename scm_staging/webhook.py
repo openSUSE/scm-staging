@@ -26,6 +26,7 @@ from py_obs.osc import Osc
 from py_obs import request
 from py_obs.request import RequestActionType
 from py_obs.request import RequestStatus
+from py_obs.service import service_wait
 from py_obs.xml_factory import StrElementField
 from py_obs import project
 from tornado.web import Application
@@ -421,6 +422,7 @@ class MainHandler(tornado.web.RequestHandler):
 
         await project.send_meta(osc, prj=prj)
         await project.send_meta(osc, prj=prj, pkg=pkg)
+        await service_wait(osc, prj, pkg)
 
         new_req = await request.submit_package(
             osc,
