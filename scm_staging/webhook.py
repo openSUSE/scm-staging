@@ -200,7 +200,7 @@ class MainHandler(tornado.web.RequestHandler):
         pr = payload.pull_request
         prj_name = (
             project_prefix if project_prefix else f"home:{self.app_config.osc.username}"
-        ) + f":SCM_STAGING:{payload.repository.name}:{pr.number}"
+        ) + f":{payload.sender.login}:{payload.repository.name}:{pr.number}"
 
         repos = []
         if project_to_copy_repos_from:
