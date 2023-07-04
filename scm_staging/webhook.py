@@ -7,6 +7,7 @@ import asyncio
 import json
 from dataclasses import dataclass, field
 from enum import StrEnum, unique
+from multiprocessing import Process, Queue
 import os
 from aiohttp import ClientResponseError
 
@@ -485,17 +486,22 @@ define(
     default=None,
     help="Filename for Tornado general log, default to console",
 )
+define(
+    "db_file",
+    default="submit_requests.db",
+    help="SQLite3 database tracking the submitrequests",
+)
 
 
 def main():
     from scm_staging.cleanup import process_all_stored_srs
+    from scm_staging import rabbit_listener as mq
 
     options.parse_command_line()
     LOGGER.configure_log_files(
         options.log, options.access_log, options.app_log, options.general_log
     )
     app_config = AppConfig.from_env()
-
     loop = asyncio.get_event_loop()
     loop.run_until_complete(
         process_all_stored_srs(
@@ -505,8 +511,19 @@ def main():
 
     app = make_app(app_config)
     app.listen(options.port)
+    LOGGER.info(f"app listent to port {options.port}")
     shutdown_event = asyncio.Event()
+
+    mq.create_db(options.db_file)
+    LOGGER.info("Database opened")
+    mqp = Process(target=mq.rabbit_listener, args=(options.db_file,))
+    mqp.start()
+    LOGGER.info("Rabbitmq forked")
     try:
         loop.run_until_complete(shutdown_event.wait())
     finally:
         loop.run_until_complete(app_config.osc.teardown())
+
+
+if __name__ == "__main__":
+    main()
