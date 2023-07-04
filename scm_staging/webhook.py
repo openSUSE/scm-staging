@@ -350,25 +350,27 @@ class MainHandler(tornado.web.RequestHandler):
             project_to_copy_repos_from=devel_prj.project if devel_prj else dest_prj,
         )
 
+        # previously opened requests from the existing project for this specific
+        # PR
+        pending_rqs = await request.search_for_requests(
+            osc,
+            user=osc.username,
+            package=pkg,
+            project=prj,
+            types=[RequestActionType.SUBMIT],
+            states=[
+                RequestStatus.NEW,
+                RequestStatus.DECLINED,
+                RequestStatus.REVIEW,
+            ],
+        )
+
         # Close all requests that were opened from the staging project if the PR
         # is merged or closed and finally delete the staging project.
         if payload.action in ("closed", "merged"):
             tasks = []
 
-            reqs_to_close = await request.search_for_requests(
-                osc,
-                user=osc.username,
-                package=pkg,
-                project=prj,
-                types=[RequestActionType.SUBMIT],
-                states=[
-                    RequestStatus.NEW,
-                    RequestStatus.DECLINED,
-                    RequestStatus.REVIEW,
-                ],
-            )
-
-            for req in reqs_to_close:
+            for req in pending_rqs:
                 if req.id and req.creator == osc.username:
                     tasks.append(
                         request.change_state(
@@ -427,9 +429,10 @@ class MainHandler(tornado.web.RequestHandler):
 
         new_req = await request.submit_package(
             osc,
-            source_prj=prj.name,
-            pkg_name=pkg.name,
-            supersede_old_request=True,
+            source_prj=prj,
+            pkg=pkg,
+            supersede_old_request=False,
+            requests_to_supersede=pending_rqs,
             dest_prj=dest_prj,
             dest_pkg=dest_pkg,
             description=f"🤖: Submission of {pkg.name} via {payload.pull_request.url} by {payload.sender.login}",
