@@ -23,6 +23,7 @@ from py_gitea_opensuse_org import (
     RepositoryApi,
     PullReview,
 )
+
 # from py_obs.osc import Osc
 from osctiny import Osc
 from py_obs import request
@@ -146,10 +147,9 @@ class AppConfig:
         if not (api_key := os.getenv("GITEA_API_KEY")):
             raise ValueError("GITEA_API_KEY environment variable must be set")
         if not (username := os.getenv("OSC_USER")):
-              raise ValueError("environment variable OSC_USER is not set")
+            raise ValueError("environment variable OSC_USER is not set")
         if not (password := os.getenv("OSC_PASSWORD")):
-              raise ValueError("environment variable OSC_PASSWORD is not set")
-
+            raise ValueError("environment variable OSC_PASSWORD is not set")
 
         conf = Configuration(
             api_key={"AuthorizationHeaderToken": api_key},
@@ -538,7 +538,7 @@ def main():
     try:
         loop.run_until_complete(shutdown_event.wait())
     finally:
-        #loop.run_until_complete(app_config.osc.teardown())
+        # loop.run_until_complete(app_config.osc.teardown())
         loop.run_until_complete(mqp.join())
 
 
