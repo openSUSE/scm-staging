@@ -20,7 +20,6 @@ pydantic = "^1.10"
 
 [tool.poetry.scripts]
 submit_to_pool = "scm_staging.submit_to_pool:main"
-rabbit_listener = "scm_staging.rabbit_listener:main"
 app = "scm_staging.webhook:main"
 ci_status = "scm_staging.ci_status:main"
 cleanup_db = "scm_staging.cleanup:cleanup"
