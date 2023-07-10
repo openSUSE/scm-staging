@@ -23,8 +23,6 @@ from scm_staging.ci_status import set_commit_status_from_obs
 from scm_staging.cleanup import process_sr
 from scm_staging.db import (
     PullRequestToSubmitRequest,
-    add_db_file_arg,
-    create_db,
     find_submitrequests,
     remove_submit_request,
 )
@@ -334,21 +332,3 @@ def rabbit_listener(db_file: str) -> None:
                 if connection.is_open:
                     connection.close()
                 connection = None
-
-
-def main() -> None:
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser = add_db_file_arg(parser)
-
-    args = parser.parse_args()
-    db_file = args.db_file[0]
-
-    LOGGER.configure_log_files()
-    create_db(db_file)
-    rabbit_listener(db_file)
-
-
-if __name__ == "__main__":
-    main()
