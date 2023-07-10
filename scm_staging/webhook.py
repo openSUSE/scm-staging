@@ -432,7 +432,11 @@ class MainHandler(tornado.web.RequestHandler):
             supersede_old_request=True,
             dest_prj=dest_prj,
             dest_pkg=dest_pkg,
-            description=f"🤖: Submission of {pkg.name} via {payload.pull_request.url} by {payload.sender.login}",
+            description=f"""{payload.pull_request.title}
+
+{payload.pull_request.body}
+
+(🤖: Submission of {pkg.name} via {payload.pull_request.url} by {payload.sender.login})""",
         )
 
         create_db(self.app_config.db_file_name)
