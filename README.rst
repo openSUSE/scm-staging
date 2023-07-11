@@ -28,12 +28,11 @@ Setup
 
    git clone https://github.com/dcermak/scm-staging
 
-2. Build the containers:
+2. Build the container:
 
 .. code-block::
 
-   buildah bud --layers -t rabbit_listener -f Dockerfile.webhook --target rabbit_listener .
-   buildah bud --layers -t webhook -f Dockerfile.webhook --target webhook .
+   buildah bud --layers -t webhook -f Dockerfile.webhook .
 
 3. Create the json configuration file. It contains a single list of objects,
    where each object configures the behavior of the bot for one organization on
@@ -54,24 +53,17 @@ Setup
      "project_prefix": "devel:scm"
    }
 
-4. Launch the containers:
+4. Launch the container:
 
 .. code-block::
 
-   podman run -d -e GITEA_API_KEY=$YOUR_API_KEY        \
-                 -e OSC_USER=$YOUR_OBS_ACCOUNT         \
+   podman run -d -e "GITEA_API_KEY=$YOUR_API_KEY"      \
+                 -e "OSC_USER=$YOUR_OBS_ACCOUNT"       \
                  -e "OSC_PASSWORD=$YOUR_OBS_PASSWORD"  \
                  -p 8000:8000                          \
                  --name webhook                        \
                  -v /path/to/config/scm_staging:/src:z \
                  localhost/webhook:latest
-
-   podman run -d -e GITEA_API_KEY=$YOUR_API_KEY        \
-                 -e OSC_USER=$YOUR_OBS_ACCOUNT         \
-                 -e "OSC_PASSWORD=$YOUR_OBS_PASSWORD"  \
-                 --name rabbit_listener                \
-                 -v /path/to/config/scm_staging:/src:z \
-                 localhost/rabbit_listener:latest
 
 
 5. Go to your dist-git repository on https://src.opensuse.org and add a
