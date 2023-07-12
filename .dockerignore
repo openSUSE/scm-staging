@@ -4,3 +4,4 @@ config.json
 .github
 .mypy_cache
 .pytest_cache
+tests/
