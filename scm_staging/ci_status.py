@@ -11,7 +11,7 @@ from py_gitea_opensuse_org.api_client import ApiClient
 from py_gitea_opensuse_org.models.create_status_option import CreateStatusOption
 from py_gitea_opensuse_org.models.branch import Branch
 from py_obs.build_result import PackageCode, fetch_build_result
-from py_obs.osc import Osc
+from osctiny import Osc
 
 
 class CommitStatusState(StrEnum):
@@ -172,4 +172,4 @@ def main() -> None:
             )
         )
     finally:
-        loop.run_until_complete(conf.osc.teardown())
+        loop.run_until_complete(conf.osc.__del__())

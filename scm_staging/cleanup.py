@@ -8,7 +8,7 @@ from py_gitea_opensuse_org import (
     MergePullRequestOption,
     RepositoryApi,
 )
-from py_obs.osc import Osc
+from osctiny import Osc
 
 # from py_obs.project import Package, Project
 from py_obs.request import RequestStatus, fetch_request

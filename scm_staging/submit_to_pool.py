@@ -73,4 +73,4 @@ def main():
             create_pr_to_pool(args.package_name[0], conf.gitea_user, repo_api)
         )
     finally:
-        loop.run_until_complete(conf.osc.teardown())
+        loop.run_until_complete(conf.osc.__del__())
