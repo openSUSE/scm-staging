@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>User Guide &#8212; scm-staging  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Git workflow setup" href="setup.html" />
+    <link rel="prev" title="SCM Staging" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading">¶</a></h1>
+<p>The git packaging workflow is currently an opt-in mechanism for submissions to
+openSUSE:Factory via <a class="reference external" href="https://src.opensuse.org">src.opensuse.org</a> instead of
+<a class="reference external" href="https://build.opensuse.org/">OBS</a>. It allows packagers to maintain their
+package sources in the <a class="reference external" href="https://src.opensuse.org/pool">pool</a> organization
+instead of on OBS. Submissions are handled via pull requests on
+<a class="reference external" href="https://src.opensuse.org">https://src.opensuse.org</a> instead of submit requests on OBS.</p>
+<p>A bot has been setup that will automatically forward eligible pull requests as
+submitrequests directly to openSUSE:Factory.</p>
+<section id="maintainer-guide">
+<h2>Maintainer Guide<a class="headerlink" href="#maintainer-guide" title="Permalink to this heading">¶</a></h2>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Consider adjusting the package description to alert contributors that
+ordinary submitrequests are no longer possible and where they should send a
+pull request instead.</p>
+</div>
+<p>To participate in the test drive, modify the development package in the
+developroject as follows:</p>
+<ol class="arabic simple">
+<li><p>Login to <a class="reference external" href="https://src.opensuse.org">https://src.opensuse.org</a> using the openSUSE IDP provider.</p></li>
+<li><p>Clone your package from <a class="reference external" href="https://src.opensuse.org/pool/$pkg_name">https://src.opensuse.org/pool/$pkg_name</a> and switch to
+the <code class="docutils literal notranslate"><span class="pre">factory</span></code> branch.</p></li>
+<li><p>Checkout your package from the configured develproject from OBS:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>osc<span class="w"> </span>co<span class="w"> </span><span class="k">$(</span>osc<span class="w"> </span>develproject<span class="w"> </span>openSUSE:Factory<span class="w"> </span><span class="nv">$pkgname</span><span class="k">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Compare your package in git (from step 2) with the package on OBS (from step
+3). If there are differences, fork the package on src.opensuse.org and send a
+pull request.</p></li>
+<li><p>Modify the package meta of the devel package via <strong class="command">osc meta -e pkg
+$develprj $pkgname</strong> by adding the following entry, which will automatically
+synchronize your package from git to OBS. This will also indicate to the
+<code class="docutils literal notranslate"><span class="pre">openSUSE:Factory</span></code> team that the package is maintained in git and that
+submitrequests are no longer expected to come from the devel project but via
+the <code class="docutils literal notranslate"><span class="pre">scm-staging-bot</span></code> that is mirroring pull requests.</p></li>
+</ol>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;package</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;$pkg_name&quot;</span><span class="w"> </span><span class="na">project=</span><span class="s">&quot;$develprj&quot;</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- snip --&gt;</span>
+<span class="w">  </span><span class="nt">&lt;scmsync&gt;</span>https://src.opensuse.org/pool/$pkg_name#factory<span class="nt">&lt;/scmsync&gt;</span>
+<span class="nt">&lt;/package&gt;</span>
+</pre></div>
+</div>
+<ol class="arabic" start="6">
+<li><p>Pull requests against the <code class="docutils literal notranslate"><span class="pre">factory</span></code> branch by a package or project
+maintainer on OBS will automatically get forwarded as submitrequests. Pull
+requests from all other users have to be approved by a maintainer first,
+before a submit request to <code class="docutils literal notranslate"><span class="pre">openSUSE:Factory</span></code> is created.</p>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">factory-auto</span></code> bot will decline more than one submission to
+the same package in <code class="docutils literal notranslate"><span class="pre">openSUSE:Factory</span></code>. You can thus use pull request
+approvals as a selection which pull request to send first.</p>
+</li>
+</ol>
+</section>
+<section id="contributor-guide">
+<h2>Contributor Guide<a class="headerlink" href="#contributor-guide" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Install the <code class="docutils literal notranslate"><span class="pre">git-scm-bridge</span></code>.</p></li>
+<li><p>Checkout the devel project of the package that you want to contribute to:</p></li>
+</ol>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="go">osc co $(osc develproject openSUSE:Factory $pkg_name)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Find the package that you want to contribute to on
+<a class="reference external" href="https://src.opensuse.org/pool">https://src.opensuse.org/pool</a> and fork it from the repository
+<code class="docutils literal notranslate"><span class="pre">src.opensuse.org/pool/$pkg_name</span></code></p></li>
+<li><p>Add the fork as a git remote to your osc checkout (<strong class="command">osc co</strong> will use
+command:<cite>git</cite> behind the scenes):</p></li>
+</ol>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="go">git remote add fork gitea@src.opensuse.org/$username/$pkg_name</span>
+<span class="go">git fetch fork</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Implement your changes:</p></li>
+</ol>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span>EDITOR<span class="w"> </span><span class="nv">$pkg_name</span>.spec
+<span class="go">osc vc -m &quot;$CLEVER_CHANGELOG_ENTRY&quot; $pkg_name.changes</span>
+<span class="go">git add ... # add the appropriate files</span>
+<span class="go">git commit -m &quot;Insightful message here&quot;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Push your changes to your fork:</p></li>
+</ol>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="go">git push fork</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Create a pull request against the <code class="docutils literal notranslate"><span class="pre">factory</span></code> branch of the package in
+src.opensuse.org/pool.</p></li>
+<li><p>The user <a class="reference external" href="https://src.opensuse.org/scm-staging-bot">scm-staging-bot</a> will
+create a submitrequest on OBS for you if your pull request has been approved
+by the package or project maintainer or if you are the package or project
+maintainer.</p></li>
+</ol>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">scm-staging</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#maintainer-guide">Maintainer Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contributor-guide">Contributor Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Git workflow setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">SCM Staging</a></li>
+      <li>Next: <a href="setup.html" title="next chapter">Git workflow setup</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, SUSE LLC.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/user_guide.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

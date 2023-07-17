@@ -13,7 +13,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Git workflow setup" href="setup.html" />
+    <link rel="next" title="User Guide" href="user_guide.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -56,10 +56,9 @@ requests and eventually a full staging workflow from pull requests in gitea.</p>
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
-<li><p>Build the containers:</p></li>
+<li><p>Build the container:</p></li>
 </ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">buildah</span> <span class="n">bud</span> <span class="o">--</span><span class="n">layers</span> <span class="o">-</span><span class="n">t</span> <span class="n">rabbit_listener</span> <span class="o">-</span><span class="n">f</span> <span class="n">Dockerfile</span><span class="o">.</span><span class="n">webhook</span> <span class="o">--</span><span class="n">target</span> <span class="n">rabbit_listener</span> <span class="o">.</span>
-<span class="n">buildah</span> <span class="n">bud</span> <span class="o">--</span><span class="n">layers</span> <span class="o">-</span><span class="n">t</span> <span class="n">webhook</span> <span class="o">-</span><span class="n">f</span> <span class="n">Dockerfile</span><span class="o">.</span><span class="n">webhook</span> <span class="o">--</span><span class="n">target</span> <span class="n">webhook</span> <span class="o">.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">buildah</span> <span class="n">bud</span> <span class="o">--</span><span class="n">layers</span> <span class="o">-</span><span class="n">t</span> <span class="n">webhook</span> <span class="o">-</span><span class="n">f</span> <span class="n">Dockerfile</span><span class="o">.</span><span class="n">webhook</span> <span class="o">.</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="3">
@@ -82,22 +81,15 @@ gitea. Each of these objects has the following contents (the keys
 </pre></div>
 </div>
 <ol class="arabic simple" start="4">
-<li><p>Launch the containers:</p></li>
+<li><p>Launch the container:</p></li>
 </ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>podman run -d -e GITEA_API_KEY=$YOUR_API_KEY        \
-              -e OSC_USER=$YOUR_OBS_ACCOUNT         \
-              -e &quot;OSC_PASSWORD=$YOUR_OBS_PASSWORD&quot;  \
-              -p 8000:8000                          \
-              --name webhook                        \
-              -v /path/to/config/scm_staging:/src:z \
-              localhost/webhook:latest
-
-podman run -d -e GITEA_API_KEY=$YOUR_API_KEY        \
-              -e OSC_USER=$YOUR_OBS_ACCOUNT         \
-              -e &quot;OSC_PASSWORD=$YOUR_OBS_PASSWORD&quot;  \
-              --name rabbit_listener                \
-              -v /path/to/config/scm_staging:/src:z \
-              localhost/rabbit_listener:latest
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">podman</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;GITEA_API_KEY=$YOUR_API_KEY&quot;</span>      \
+              <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;OSC_USER=$YOUR_OBS_ACCOUNT&quot;</span>       \
+              <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;OSC_PASSWORD=$YOUR_OBS_PASSWORD&quot;</span>  \
+              <span class="o">-</span><span class="n">p</span> <span class="mi">8000</span><span class="p">:</span><span class="mi">8000</span>                          \
+              <span class="o">--</span><span class="n">name</span> <span class="n">webhook</span>                        \
+              <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">config</span><span class="o">/</span><span class="n">scm_staging</span><span class="p">:</span><span class="o">/</span><span class="n">src</span><span class="p">:</span><span class="n">z</span> \
+              <span class="n">localhost</span><span class="o">/</span><span class="n">webhook</span><span class="p">:</span><span class="n">latest</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="5">
@@ -110,6 +102,11 @@ organization or the full gitea instance.</p></li>
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#maintainer-guide">Maintainer Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide.html#contributor-guide">Contributor Guide</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Git workflow setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api.html#module-scm_staging.webhook"><code class="xref py py-mod docutils literal notranslate"><span class="pre">webhook</span></code> module</a></li>
@@ -151,6 +148,7 @@ organization or the full gitea instance.</p></li>
 
 <h3>Navigation</h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Git workflow setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
@@ -159,7 +157,7 @@ organization or the full gitea instance.</p></li>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="setup.html" title="next chapter">Git workflow setup</a></li>
+      <li>Next: <a href="user_guide.html" title="next chapter">User Guide</a></li>
   </ul></li>
 </ul>
 </div>
