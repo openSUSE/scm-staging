@@ -21,14 +21,14 @@ Maintainer Guide
    pull request instead.
 
 To participate in the test drive, modify the development package in the
-developroject as follows:
+devel project as follows:
 
 1. Login to https://src.opensuse.org using the openSUSE IDP provider.
 
 2. Clone your package from https://src.opensuse.org/pool/$pkg_name and switch to
    the ``factory`` branch.
 
-3. Checkout your package from the configured develproject from OBS:
+3. Checkout your package from the configured devel project from OBS:
 
 .. code-block:: bash
 
