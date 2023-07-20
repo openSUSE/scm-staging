@@ -53,17 +53,17 @@ pull request instead.</p>
 devel project as follows:</p>
 <ol class="arabic simple">
 <li><p>Login to <a class="reference external" href="https://src.opensuse.org">https://src.opensuse.org</a> using the openSUSE IDP provider.</p></li>
-<li><p>Clone your package from <a class="reference external" href="https://src.opensuse.org/pool/$pkg_name">https://src.opensuse.org/pool/$pkg_name</a> and switch to
-the <code class="docutils literal notranslate"><span class="pre">factory</span></code> branch.</p></li>
 <li><p>Checkout your package from the configured devel project from OBS:</p></li>
 </ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>osc<span class="w"> </span>co<span class="w"> </span><span class="k">$(</span>osc<span class="w"> </span>develproject<span class="w"> </span>openSUSE:Factory<span class="w"> </span><span class="nv">$pkgname</span><span class="k">)</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="4">
+<ol class="arabic simple" start="3">
+<li><p>Clone your package from <a class="reference external" href="https://src.opensuse.org/pool/$pkg_name">https://src.opensuse.org/pool/$pkg_name</a> in a
+temporary location and switch to the <code class="docutils literal notranslate"><span class="pre">factory</span></code> branch.</p></li>
 <li><p>Compare your package in git (from step 2) with the package on OBS (from step
 3). If there are differences, fork the package on src.opensuse.org and send a
-pull request.</p></li>
+pull request to get both in sync.</p></li>
 <li><p>Modify the package meta of the devel package via <strong class="command">osc meta -e pkg
 $develprj $pkgname</strong> by adding the following entry, which will automatically
 synchronize your package from git to OBS. This will also indicate to the
@@ -77,7 +77,13 @@ the <code class="docutils literal notranslate"><span class="pre">scm-staging-bot
 <span class="nt">&lt;/package&gt;</span>
 </pre></div>
 </div>
-<ol class="arabic" start="6">
+<ol class="arabic simple" start="6">
+<li><p>Checkout your package again via (it should now be a git repository):</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>osc<span class="w"> </span>co<span class="w"> </span><span class="k">$(</span>osc<span class="w"> </span>develproject<span class="w"> </span>openSUSE:Factory<span class="w"> </span><span class="nv">$pkgname</span><span class="k">)</span>
+</pre></div>
+</div>
+<ol class="arabic" start="7">
 <li><p>Pull requests against the <code class="docutils literal notranslate"><span class="pre">factory</span></code> branch by a package or project
 maintainer on OBS will automatically get forwarded as submitrequests. Pull
 requests from all other users have to be approved by a maintainer first,
