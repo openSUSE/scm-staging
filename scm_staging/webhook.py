@@ -521,7 +521,7 @@ def main():
     LOGGER.info(f"app listent to port {options.port}")
     shutdown_event = asyncio.Event()
 
-    mq.create_db(options.db_file)
+    create_db(options.db_file)
     LOGGER.info("Database opened")
     mqp = Process(target=mq.rabbit_listener, args=(options.db_file,))
     mqp.start()
