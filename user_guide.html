@@ -91,7 +91,7 @@ approvals as a selection which pull request to send first.</p>
 <section id="contributor-guide">
 <h2>Contributor Guide<a class="headerlink" href="#contributor-guide" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
-<li><p>Install the <code class="docutils literal notranslate"><span class="pre">git-scm-bridge</span></code>.</p></li>
+<li><p>Install the <code class="docutils literal notranslate"><span class="pre">obs-scm-bridge</span></code>.</p></li>
 <li><p>Checkout the devel project of the package that you want to contribute to:</p></li>
 </ol>
 <div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="go">osc co $(osc develproject openSUSE:Factory $pkg_name)</span>
@@ -104,7 +104,7 @@ approvals as a selection which pull request to send first.</p>
 <li><p>Add the fork as a git remote to your osc checkout (<strong class="command">osc co</strong> will use
 command:<cite>git</cite> behind the scenes):</p></li>
 </ol>
-<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="go">git remote add fork gitea@src.opensuse.org/$username/$pkg_name</span>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="go">git remote add fork gitea@src.opensuse.org:$username/$pkg_name</span>
 <span class="go">git fetch fork</span>
 </pre></div>
 </div>
