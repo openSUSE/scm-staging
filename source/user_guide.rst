@@ -65,7 +65,7 @@ devel project as follows:
 Contributor Guide
 -----------------
 
-1. Install the ``git-scm-bridge``.
+1. Install the ``obs-scm-bridge``.
 
 2. Checkout the devel project of the package that you want to contribute to:
 
@@ -82,7 +82,7 @@ Contributor Guide
 
 .. code-block:: shell-session
 
-   git remote add fork gitea@src.opensuse.org/$username/$pkg_name
+   git remote add fork gitea@src.opensuse.org:$username/$pkg_name
    git fetch fork
 
 5. Implement your changes:
