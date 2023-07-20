@@ -25,18 +25,18 @@ devel project as follows:
 
 1. Login to https://src.opensuse.org using the openSUSE IDP provider.
 
-2. Clone your package from https://src.opensuse.org/pool/$pkg_name and switch to
-   the ``factory`` branch.
-
-3. Checkout your package from the configured devel project from OBS:
+2. Checkout your package from the configured devel project from OBS:
 
 .. code-block:: bash
 
    osc co $(osc develproject openSUSE:Factory $pkgname)
 
+3. Clone your package from https://src.opensuse.org/pool/$pkg_name in a
+   temporary location and switch to the ``factory`` branch.
+
 4. Compare your package in git (from step 2) with the package on OBS (from step
    3). If there are differences, fork the package on src.opensuse.org and send a
-   pull request.
+   pull request to get both in sync.
 
 5. Modify the package meta of the devel package via :command:`osc meta -e pkg
    $develprj $pkgname` by adding the following entry, which will automatically
@@ -52,7 +52,13 @@ devel project as follows:
      <scmsync>https://src.opensuse.org/pool/$pkg_name#factory</scmsync>
    </package>
 
-6. Pull requests against the ``factory`` branch by a package or project
+6. Checkout your package again via (it should now be a git repository):
+
+.. code-block:: bash
+
+   osc co $(osc develproject openSUSE:Factory $pkgname)
+
+7. Pull requests against the ``factory`` branch by a package or project
    maintainer on OBS will automatically get forwarded as submitrequests. Pull
    requests from all other users have to be approved by a maintainer first,
    before a submit request to ``openSUSE:Factory`` is created.
