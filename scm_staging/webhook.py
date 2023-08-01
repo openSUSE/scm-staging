@@ -7,7 +7,7 @@ import asyncio
 import json
 from dataclasses import dataclass, field
 from enum import StrEnum, unique
-from multiprocessing import Process, Queue
+from multiprocessing import Process
 import os
 from aiohttp import ClientResponseError
 
@@ -21,7 +21,6 @@ from py_gitea_opensuse_org import (
     IssueApi,
     CreateIssueCommentOption,
     RepositoryApi,
-    PullReview,
 )
 from py_obs.osc import Osc
 from py_obs import request
