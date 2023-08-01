@@ -5,12 +5,14 @@ package build results and updating the commit status.
 
 import asyncio
 import json
+from datetime import datetime
 from typing import TypedDict
 from pika.adapters.blocking_connection import BlockingChannel
 from pika.exchange_type import ExchangeType
 from pika.spec import Basic
 import pika
 import pika.exceptions
+import re
 from py_gitea_opensuse_org import (
     CreateIssueCommentOption,
     RepositoryApi,
@@ -144,6 +146,10 @@ _RT_TO_TYPE_MAPPING = {
 
 def _process_message(routing_key: str, body: str) -> None:
     """Smoke test for the message payload models"""
+    if re.match("opensuse.obs.request", routing_key):
+        with open("/tmp/msg_debug_log", mode="a") as f:
+            f.write(f"{datetime.now().isoformat()} - {routing_key} - {body}\n")
+
     if routing_key not in _RT_TO_TYPE_MAPPING.keys():
         return
 
