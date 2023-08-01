@@ -8,6 +8,7 @@ from py_gitea_opensuse_org import (
     MergePullRequestOption,
     RepositoryApi,
 )
+from py_obs.logger import LOGGER
 from py_obs.osc import Osc
 
 # from py_obs.project import Package, Project
@@ -42,18 +43,26 @@ async def process_sr(
         return False
 
     kwargs = {
-        "owner": pr_to_sr.gitea_repo_owner,
-        "repo": pr_to_sr.gitea_repo_name,
-        "index": pr_to_sr.pull_request_number,
+        "owner": (owner := pr_to_sr.gitea_repo_owner),
+        "repo": (repo := pr_to_sr.gitea_repo_name),
+        "index": (pr_num := pr_to_sr.pull_request_number),
     }
 
     repo_api = RepositoryApi(api_client)
     issue_api = IssueApi(api_client)
 
     if sr_state == RequestStatus.ACCEPTED and pr_to_sr.merge_pr:
-        await repo_api.repo_merge_pull_request(
-            **kwargs, body=MergePullRequestOption(Do="merge")
-        )
+        pr = await repo_api.repo_get_pull_request(**kwargs)
+        if pr.state == "open":
+            try:
+                await repo_api.repo_merge_pull_request(
+                    **kwargs, body=MergePullRequestOption(Do="merge")
+                )
+            except Exception as exc:
+                LOGGER.error(
+                    "Could not merge pr %s/%s:%s, got: %s", owner, repo, pr_num, exc
+                )
+                return False
 
     if sr_state == RequestStatus.DECLINED:
         await repo_api.repo_edit_pull_request(
@@ -80,11 +89,18 @@ async def process_all_stored_srs(
     srs = find_submitrequests(db_file_name)
 
     for pr_to_sr in srs:
-        req = await fetch_request(osc, request_id=(sr_id := pr_to_sr.submit_request_id))
-        if (rq_state := req.state) and await process_sr(
-            rq_state.state, pr_to_sr, api_client
-        ):
-            remove_submit_request(db_file_name, sr_id=sr_id)
+        try:
+            req = await fetch_request(
+                osc, request_id=(sr_id := pr_to_sr.submit_request_id)
+            )
+            if (rq_state := req.state) and await process_sr(
+                rq_state.state, pr_to_sr, api_client
+            ):
+                remove_submit_request(db_file_name, sr_id=sr_id)
+        except Exception as exc:
+            LOGGER.error(
+                "Failed to process SR/PR (%s): %s", pr_to_sr, exc, exc.with_traceback
+            )
 
 
 def cleanup() -> None:
