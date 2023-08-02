@@ -322,13 +322,3 @@ def rabbit_listener(db_file: str) -> None:
             # Recover on all other connection errors
             LOGGER.debug("Connection was closed: %s, retrying", err)
             continue
-
-        finally:
-            if channel:
-                if channel.is_open:
-                    channel.close()
-                channel = None
-            if connection:
-                if connection.is_open:
-                    connection.close()
-                connection = None
