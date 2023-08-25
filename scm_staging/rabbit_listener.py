@@ -322,3 +322,8 @@ def rabbit_listener(db_file: str) -> None:
             # Recover on all other connection errors
             LOGGER.debug("Connection was closed: %s, retrying", err)
             continue
+
+        except Exception as exc:
+            # recover from all other errors, e.g. in the callbacks
+            LOGGER.error("Exception thrown in rabbitmq callback: %s", exc)
+            continue
