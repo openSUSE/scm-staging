@@ -79,6 +79,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Public IP
+        id: public_ip
+        uses: haythem/public-ip@v1.3
+
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
@@ -94,8 +98,12 @@ jobs:
       - run: pip install --upgrade poetry
       - run: poetry install
 
-      - name: Run the actual tests
+      - name: Run the full integration tests
         run: poetry run pytest -vv
+        env:
+          WEBHOOK_IP: ${{ steps.public_ip.outputs.ipv4 }}
+          OSC_PASSWORD: ${{ secrets.OSC_PASSWORD }}
+          GITEA_API_KEY: ${{ secrets.GITEA_API_KEY }}
 
       # - name: Upload coverage to Codecov
       #   uses: codecov/codecov-action@v3
