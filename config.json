@@ -1,0 +1,11 @@
+[
+  {
+    "target_branch_name": "factory",
+    "organization": "pool",
+    "require_approval": true,
+    "destination_project": "openSUSE:Factory",
+    "merge_pr": true,
+    "submission_style": "direct",
+    "project_prefix": "devel:Factory:git-workflow:staging"
+  }
+]
