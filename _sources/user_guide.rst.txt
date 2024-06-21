@@ -34,7 +34,7 @@ devel project as follows:
 3. Clone your package from https://src.opensuse.org/pool/$pkg_name in a
    temporary location and switch to the ``factory`` branch.
 
-4. Compare your package in git (from step 2) with the package on OBS (from step
+4. Compare your package on OBS (from step 2) with the package in git (from step
    3). If there are differences, fork the package on src.opensuse.org and send a
    pull request to get both in sync.
 
