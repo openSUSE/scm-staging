@@ -26,7 +26,7 @@ Setup
 
 .. code-block::
 
-   git clone https://github.com/dcermak/scm-staging
+   git clone https://github.com/openSUSE/scm-staging
 
 2. Build the container:
 
