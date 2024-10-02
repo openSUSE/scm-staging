@@ -36,10 +36,13 @@ from scm_staging.config import BranchConfig, SubmissionStyle, load_config
 from scm_staging.logger import LOGGER
 from scm_staging.db import (
     DEFAULT_DB_NAME,
+    PullRequestToBuild,
     PullRequestToSubmitRequest,
     create_db,
     insert_submit_request,
     remove_submit_request,
+    insert_build_project,
+    remove_build_project,
 )
 
 
@@ -129,12 +132,55 @@ class PullRequestPayload(BaseModel):
     review: Review | None
 
 
+class Comment(BaseModel):
+    id: int
+    user: User
+    body: str
+
+
+class IssueRepository(BaseModel):
+    id: int
+    name: str
+    owner: str
+    full_name: str
+
+
+class Issue(BaseModel):
+    id: int
+    url: str
+    number: int
+    user: User
+    title: str
+    body: str
+    labels: list[Label]
+    milestone: Milestone | None
+    assignee: User | None
+    assignees: list[User] | None
+    state: str
+    is_locked: bool
+    repository: IssueRepository
+    # FIXME: is a date
+    created_at: str
+    # FIXME: is a date
+    updated_at: str
+
+
+class CommentPayload(BaseModel):
+    action: str
+    comment: Comment
+    sender: User
+    repository: Repository
+    issue: Issue
+    is_pull: bool
+
+
 @dataclass(frozen=True)
 class AppConfig:
     gitea_user: str
     branch_config: list[BranchConfig]
     osc: Osc
     db_file_name: str = DEFAULT_DB_NAME
+    build_project_prefix: str = ""
 
     _conf: Configuration = field(default_factory=Configuration)
     _api_client: ApiClient = field(default_factory=lambda: ApiClient(Configuration()))
@@ -144,6 +190,8 @@ class AppConfig:
         api_key = os.getenv("GITEA_API_KEY")
         if not api_key:
             raise ValueError("GITEA_API_KEY environment variable must be set")
+
+        build_project_prefix = os.getenv("BUILD_PREFIX", "")
 
         conf = Configuration(
             api_key={"AuthorizationHeaderToken": api_key},
@@ -156,18 +204,24 @@ class AppConfig:
             gitea_user=os.getenv("BOT_USER", osc.username),
             branch_config=load_config(os.getenv("BRANCH_CONFIG", "config.json")),
             db_file_name=os.getenv("DB_FILE_NAME", DEFAULT_DB_NAME),
+            build_project_prefix=build_project_prefix,
             _conf=conf,
             _api_client=ApiClient(conf),
         )
 
 
-def package_from_pull_request(payload: PullRequestPayload) -> project.Package:
+def package_from_pull_request(
+    payload: PullRequestPayload | CommentPayload,
+    pr: PullRequest | None = None,
+) -> project.Package:
+    if pr is None:
+        pr = payload.pull_request
     return project.Package(
         name=payload.repository.name,
         title=StrElementField(f"The {payload.repository.name} package"),
-        url=StrElementField(payload.pull_request.url),
+        url=StrElementField(pr.url),
         scmsync=StrElementField(
-            f"{payload.pull_request.head.repo.clone_url}#{payload.pull_request.head.sha}"
+            f"{pr.head.repo.clone_url}#{pr.head.sha}"
         ),
     )
 
@@ -197,11 +251,17 @@ class MainHandler(tornado.web.RequestHandler):
         payload: PullRequestPayload,
         project_prefix: str | None,
         project_to_copy_repos_from: str | None = None,
+        pr_number: int | None = None,
+        pr_url: str | None = None,
     ) -> project.Project:
-        pr = payload.pull_request
+        if pr_number is None:
+            pr_number = payload.pull_request.number
+        if pr_url is None:
+            pr_url = payload.pull_request.url
+
         prj_name = (
             project_prefix if project_prefix else f"home:{self.app_config.osc.username}"
-        ) + f":{payload.sender.login}:{payload.repository.name}:{pr.number}"
+        ) + f":{payload.sender.login}:{payload.repository.name}:{pr_number}"
 
         repos = []
         if project_to_copy_repos_from:
@@ -226,8 +286,8 @@ class MainHandler(tornado.web.RequestHandler):
 
         return project.Project(
             name=prj_name,
-            title=StrElementField(f"Project for Pull Request {pr.number}"),
-            description=StrElementField(f"Project for Pull Request {pr.url}"),
+            title=StrElementField(f"Project for Pull Request {pr_number}"),
+            description=StrElementField(f"Project for Pull Request {pr_url}"),
             person=[
                 project.Person(
                     userid=self.app_config.osc.username,
@@ -286,14 +346,109 @@ class MainHandler(tornado.web.RequestHandler):
         return False
 
     async def post(self) -> None:
+        payload = None
+
         if not self.request.body:
             return
 
         try:
             payload = PullRequestPayload(**json.loads(self.request.body))
         except ValidationError:
+            pass
+        else:
+            # New PR
+            await self.handle_pull_request(payload)
             return
 
+        try:
+            payload = CommentPayload(**json.loads(self.request.body))
+        except ValidationError:
+            pass
+        else:
+            # New PR comment
+            await self.handle_comment(payload)
+            return
+
+    async def handle_comment(self, payload: CommentPayload) -> None:
+        """
+        Wait for bot commands and run specific tasks:
+         + bot build -> creates a new build project in OBS
+        """
+
+        if not payload.is_pull:
+            return
+        if payload.issue.state == "closed":
+            return
+
+        try:
+            comment = payload.comment.body.strip()
+            bot, command, *args = comment.split(" ")
+        except ValueError:
+            return
+
+        # All commands should start with bot
+        if bot != "bot":
+            return
+
+        # Custom build
+        if command == "build":
+            if args:
+                devel_prj = args[0]
+            else:
+                devel_prj = "openSUSE:Factory"
+
+            osc = self.app_config.osc
+            api_client = self.app_config._api_client
+            owner = payload.issue.repository.owner
+            name = payload.issue.repository.name
+            number = payload.issue.number
+            url = payload.issue.url
+            repo_api = RepositoryApi(api_client)
+            pr = await repo_api.repo_get_pull_request(owner, name, number)
+
+            prj = await self.project_from_pull_request(
+                payload,
+                self.app_config.build_project_prefix,
+                project_to_copy_repos_from=devel_prj,
+                pr_number=number,
+                pr_url=url,
+            )
+            pkg = package_from_pull_request(payload, pr)
+
+            await project.send_meta(osc, prj=prj)
+            await project.send_meta(osc, prj=prj, pkg=pkg)
+            await service_wait(osc, prj, pkg)
+
+            create_db(self.app_config.db_file_name)
+            remove_build_project(self.app_config.db_file_name, prj.name)
+            insert_build_project(
+                self.app_config.db_file_name,
+                PullRequestToBuild(
+                    obs_package_name=pkg.name,
+                    obs_project_name=prj.name,
+                    gitea_repo_owner=owner,
+                    gitea_repo_name=name,
+                    pull_request_number=number,
+                ),
+            )
+
+            # comment on the PR with a link to the Project
+            issue_api = IssueApi(api_client)
+            await issue_api.issue_create_comment(
+                owner,
+                name,
+                number,
+                body=CreateIssueCommentOption(
+                    body=f"build project [{prj.name}](https://build.opensuse.org/package/show/{prj.name}/{pkg.name})"
+                ),
+            )
+            await osc.api_request(
+                f"/build/{prj.name}",
+                params={"cmd": "rebuild"},
+                method="POST",
+            )
+
+    async def handle_pull_request(self, payload: PullRequestPayload) -> None:
         LOGGER.debug(payload)
 
         matching_branch_conf: BranchConfig | None = None
@@ -369,6 +524,7 @@ class MainHandler(tornado.web.RequestHandler):
         if payload.action in ("closed", "merged"):
             tasks = []
 
+            remove_build_project(self.app_config.db_file_name, prj.name)
             for req in pending_rqs:
                 if req.id and req.creator == osc.username:
                     tasks.append(

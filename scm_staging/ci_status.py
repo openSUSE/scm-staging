@@ -33,7 +33,7 @@ async def set_commit_status_from_obs(
     commit_sha: str,
     pkg_name: str,
     project_name: str,
-) -> None:
+) -> CommitStatusState:
     # there's no build results (e.g. because the project & package do not exist)
     # => do nothing
     try:
@@ -89,6 +89,7 @@ async def set_commit_status_from_obs(
             state=str(ci_state),
         ),
     )
+    return ci_state
 
 
 async def fetch_hash_of_head_of_branch(

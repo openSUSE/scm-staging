@@ -43,6 +43,29 @@ class PullRequestToSubmitRequest(BaseModel):
     merge_pr: bool
 
 
+class PullRequestToBuild(BaseModel):
+    """pydantic model used to store the devel project and their corresponding
+    pull requests on gitea.
+
+    """
+
+    #: name of the project on OBS where the package is created
+    obs_project_name: str
+
+    #: name of the package on OBS where the pull request is checked out
+    obs_package_name: str
+
+    #: Owner of the repository against which the PR has been opened
+    gitea_repo_owner: str
+
+    #: Name of the repository against which the PR has been opened
+    gitea_repo_name: str
+
+    #: Number of the pull request via which the PR can be found in the web
+    #: UI. This is **not** the ID of the pull request!
+    pull_request_number: int
+
+
 _SR_ID_KEY = "id"
 _OBS_PRJ_NAME_KEY = "obs_prj_name"
 _OBS_PKG_NAME_KEY = "obs_pkg_name"
@@ -58,6 +81,13 @@ _TABLE_KEYS = [
     _GITEA_REPO_NAME_KEY,
     _PR_NUMBER_KEY,
     _MERGE_PR_KEY,
+]
+_BUILD_TABLE_KEYS = [
+    _OBS_PRJ_NAME_KEY,
+    _OBS_PKG_NAME_KEY,
+    _GITEA_REPO_OWNER_KEY,
+    _GITEA_REPO_NAME_KEY,
+    _PR_NUMBER_KEY,
 ]
 
 
@@ -86,8 +116,24 @@ def create_db(db_file: str) -> None:
         + ")"
     )
 
+    sql_cmd2 = (
+        "CREATE TABLE IF NOT EXISTS builds("
+        + ", ".join(
+            f"{key} {type}"
+            for key, type in (
+                (_OBS_PRJ_NAME_KEY, "VARCHAR PRIMARY KEY"),
+                (_OBS_PKG_NAME_KEY, "VARCHAR"),
+                (_GITEA_REPO_OWNER_KEY, "VARCHAR"),
+                (_GITEA_REPO_NAME_KEY, "VARCHAR"),
+                (_PR_NUMBER_KEY, "INTEGER"),
+            )
+        )
+        + ")"
+    )
+
     with con:
         con.execute(sql_cmd)
+        con.execute(sql_cmd2)
     con.close()
 
 
@@ -123,12 +169,52 @@ def insert_submit_request(db_file: str, pr_to_sr: PullRequestToSubmitRequest) ->
         con.close()
 
 
+def insert_build_project(db_file: str, pr_to_build: PullRequestToBuild) -> None:
+    """Inserts the supplied :py:class:`PullRequestToBuild` into the
+    database.
+
+    """
+    con = sqlite3.connect(db_file)
+    sql_insert = (
+        "INSERT INTO builds("
+        + ", ".join(_BUILD_TABLE_KEYS)
+        + ") VALUES("
+        + ", ".join("?" for _ in _BUILD_TABLE_KEYS)
+        + ")"
+    )
+
+    try:
+        with con:
+            con.execute(
+                sql_insert,
+                (
+                    pr_to_build.obs_project_name,
+                    pr_to_build.obs_package_name,
+                    pr_to_build.gitea_repo_owner,
+                    pr_to_build.gitea_repo_name,
+                    pr_to_build.pull_request_number,
+                ),
+            )
+    finally:
+        con.close()
+
+
 def remove_submit_request(db_file: str, sr_id: int) -> None:
     """Removes the submit request with the supplied id from the database."""
     con = sqlite3.connect(db_file)
     try:
         with con:
             con.execute("DELETE from requests where id = ?", (sr_id,))
+    finally:
+        con.close()
+
+
+def remove_build_project(db_file: str, obs_project_name: str) -> None:
+    """Removes the devel project with the supplied obs_prj_name from the database."""
+    con = sqlite3.connect(db_file)
+    try:
+        with con:
+            con.execute("DELETE from builds where obs_prj_name = ?", (obs_project_name,))
     finally:
         con.close()
 
@@ -179,6 +265,53 @@ def find_submitrequests(
                     merge_pr=merge_pr,
                 )
                 for sr_id, obs_prj_name, obs_pkg_name, repo_owner, repo_name, pr_num, merge_pr in res.fetchall()
+            ]
+    finally:
+        con.close()
+
+
+def find_buildproject(
+    db_file: str,
+    *,
+    obs_project_name: str | None = None,
+    obs_package_name: str | None = None,
+) -> list[PullRequestToSubmitRequest]:
+    """Returns all builds from the database when no optional parameters
+    are supplied. If any of the optional parameters is supplied then only
+    builds with that matching parameter are returned. If no
+    builds match, then an empty list is returned.
+
+    """
+    con = sqlite3.connect(db_file)
+    try:
+        with con:
+            select = "SELECT * FROM builds"
+
+            params: tuple[str, ...] = ()
+            select_params = [
+                (param, key)
+                for param, key in (
+                    (obs_project_name, _OBS_PRJ_NAME_KEY),
+                    (obs_package_name, _OBS_PKG_NAME_KEY),
+                )
+                if param
+            ]
+            if select_params:
+                select += " WHERE " + " AND ".join(
+                    f"{key} = ?" for _, key in select_params
+                )
+                params = tuple(param for param, _ in select_params)
+
+            res = con.execute(select, params)
+            return [
+                PullRequestToBuild(
+                    obs_project_name=obs_prj_name,
+                    obs_package_name=obs_pkg_name,
+                    gitea_repo_owner=repo_owner,
+                    gitea_repo_name=repo_name,
+                    pull_request_number=pr_num,
+                )
+                for obs_prj_name, obs_pkg_name, repo_owner, repo_name, pr_num in res.fetchall()
             ]
     finally:
         con.close()
