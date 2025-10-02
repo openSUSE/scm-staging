@@ -1,3 +1,11 @@
+Deprecation notice
+==================
+
+This guide is meant to be used with a workflow that bypasses the typical devel project workflow in OBS.
+As we are implementing devel projects in OBS with Git, this guide is deprecated and should not be used
+anymore.
+
+
 User Guide
 ==========
 
