@@ -19,10 +19,13 @@ from py_gitea_opensuse_org import (
 from py_obs.request import RequestStatus
 from pydantic import BaseModel, ValidationError
 
+from scm_staging.ci_status import CommitStatusState
 from scm_staging.ci_status import set_commit_status_from_obs
 from scm_staging.cleanup import process_sr
 from scm_staging.db import (
     PullRequestToSubmitRequest,
+    PullRequestToBuild,
+    find_buildproject,
     find_submitrequests,
     remove_submit_request,
 )
@@ -275,6 +278,51 @@ def rabbit_listener(db_file: str) -> None:
                         project_name=payload.project,
                     )
                 )
+
+            builds = find_buildproject(
+                db_file,
+                obs_project_name=payload.project,
+                obs_package_name=payload.package,
+            )
+            if len(builds) == 1:
+                LOGGER.debug(
+                    "package %s got built in %s", payload.package, payload.project
+                )
+                build = builds[0]
+
+                # get the pr for the commit sha
+                pr = loop.run_until_complete(
+                    repo_api.repo_get_pull_request(
+                        owner=build.gitea_repo_owner,
+                        repo=build.gitea_repo_name,
+                        index=build.pull_request_number,
+                    )
+                )
+                state = loop.run_until_complete(
+                    set_commit_status_from_obs(
+                        app_config.osc,
+                        app_config._api_client,
+                        commit_sha=pr.head.sha,
+                        repo_name=build.gitea_repo_name,
+                        repo_owner=build.gitea_repo_owner,
+                        pkg_name=payload.package,
+                        project_name=payload.project,
+                    )
+                )
+                if state != CommitStatusState.PENDING:
+                    prj = build.obs_project_name
+                    name = build.obs_package_name
+                    loop.run_until_complete(
+                        issue_api.issue_create_comment(
+                            build.gitea_repo_owner,
+                            build.gitea_repo_name,
+                            build.pull_request_number,
+                            body=CreateIssueCommentOption(
+                                body=f"test build {state} [{prj}](https://build.opensuse.org/package/show/{prj}/{name})"
+                            ),
+                        )
+                    )
+
         except Exception as exc:
             LOGGER.error(
                 "Failed to set commit status from msg '%s': '%s', got: %s",
